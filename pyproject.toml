@@ -5,7 +5,10 @@ description = "Add a short description here"
 authors = [
     { name = "ninebolt6", email = "67471674+ninebolt6@users.noreply.github.com" }
 ]
-dependencies = []
+dependencies = [
+    "ultralytics~=8.0.114",
+    "setuptools~=67.8.0", # コマンドが動かないので明示的に追加
+]
 readme = "README.md"
 requires-python = ">= 3.8"
 
