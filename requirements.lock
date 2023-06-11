@@ -12,11 +12,13 @@ charset-normalizer==3.1.0
 colorama==0.4.6
 contourpy==1.0.7
 cycler==0.11.0
+cython==0.29.35
 filelock==3.12.1
 fonttools==4.39.4
 idna==3.4
 jinja2==3.1.2
 kiwisolver==1.4.4
+lap @ git+https://github.com/DeGirum/lap
 markupsafe==2.1.3
 matplotlib==3.7.1
 mpmath==1.3.0
