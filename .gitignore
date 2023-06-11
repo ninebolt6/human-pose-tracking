@@ -12,3 +12,12 @@ wheels/
 # assets
 datasets/
 dataspace/
+*.jpg
+*.jpeg
+*.mp4
+
+# outputs
+runs/
+
+# ultralytics files
+*.pt
