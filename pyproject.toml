@@ -23,5 +23,9 @@ managed = true
 [tool.rye.scripts]
 predict = "python predict.py"
 
+[[tool.rye.sources]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu118"
+
 [tool.hatch.metadata]
 allow-direct-references = true
