@@ -21,7 +21,7 @@ build-backend = "hatchling.build"
 managed = true
 
 [tool.rye.scripts]
-predict = "python predict.py"
+track = "python track.py"
 
 [[tool.rye.sources]]
 name = "pytorch"
