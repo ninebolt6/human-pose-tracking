@@ -70,7 +70,7 @@ for frame_num, result in enumerate(
 
         data.append(
             Person(
-                id=int(boxes[i].id.item()),
+                person_id=int(boxes[i].id.item()),
                 box=Box(
                     xyxy=boxes[i].xyxy[0],
                     confidence=boxes[i].conf[0],

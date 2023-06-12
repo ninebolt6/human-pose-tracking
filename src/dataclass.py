@@ -28,13 +28,13 @@ class Box:
 
 @dataclass(frozen=True)
 class Person:
-    id: int
+    person_id: int
     box: Box
     keypoints: dict[KeypointEnum, Keypoint]
 
     def serialize(self) -> dict:
         return {
-            "id": self.id,
+            "person_id": self.person_id,
             "box": {
                 "xyxy": self.box.xyxy.tolist(),
                 "confidence": self.box.confidence.tolist(),
