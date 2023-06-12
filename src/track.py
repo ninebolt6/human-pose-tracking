@@ -1,10 +1,11 @@
+import cv2
 from datetime import datetime
 import torch
 from ultralytics import YOLO
-from ultralytics.yolo.v8.pose.predict import Results
 import json
 import os
 import time
+from tqdm import tqdm
 
 from dataclass import Box, Person, Keypoint
 from util import PersonJSONEncoder, parse_result
@@ -13,17 +14,18 @@ from util import PersonJSONEncoder, parse_result
 
 started_at = time.time()
 
+VIDEO_PATH = "target.mp4"
 OUTPUT_FOLDER = "out"
 OUTPUT_NANE = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 OUTPUT_DIR = os.path.join(OUTPUT_FOLDER, OUTPUT_NANE)
 
 # Load a model
-model = YOLO("yolov8n-pose.pt")
+model = YOLO("yolov8x-pose-p6.pt")
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("using", device, "as device")
 
-results: list[Results] = model.track(
-    source="output.mp4",  # 読み込むファイル
+results = model.track(
+    source=VIDEO_PATH,  # 読み込むファイル
     stream=True,  # メモリを大量に食うのでstreaming処理
     device=device,
     imgsz=1920,
@@ -39,7 +41,13 @@ results: list[Results] = model.track(
 
 os.makedirs(os.path.join(OUTPUT_DIR, "keypoints"), exist_ok=True)
 
-for frame_num, result in enumerate(results):
+for frame_num, result in enumerate(
+    tqdm(
+        results,
+        total=int(cv2.VideoCapture(VIDEO_PATH).get(cv2.CAP_PROP_FRAME_COUNT)),
+        unit="frame",
+    )
+):
     boxes, keypoints = parse_result(result)
     detected_person_length = boxes.shape[0]
 

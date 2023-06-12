@@ -8,7 +8,8 @@ authors = [
 dependencies = [
     "lap @ git+https://github.com/DeGirum/lap",
     "ultralytics~=8.0.114",
-    "setuptools~=67.8.0", # コマンドが動かないので明示的に追加
+    "setuptools~=67.8.0",
+    "tqdm~=4.65.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
