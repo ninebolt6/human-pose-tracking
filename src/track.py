@@ -7,6 +7,7 @@ import os
 from tqdm import tqdm
 
 from dataclass import Box, Person, Keypoint
+from keypoint import KeypointEnum
 from util import PersonJSONEncoder, parse_result
 
 
@@ -59,6 +60,14 @@ for frame_num, result in enumerate(
     data: list[Person] = []
 
     for i in range(detected_person_length):
+        keypointDict: dict[KeypointEnum, Keypoint] = {}
+
+        for keypointIndex in KeypointEnum:
+            keypointDict[keypointIndex] = Keypoint(
+                xy=keypoints[i].xy[0][keypointIndex.value],
+                confidence=keypoints[i].conf[0][keypointIndex.value],
+            )
+
         data.append(
             Person(
                 id=int(boxes[i].id.item()),
@@ -66,10 +75,7 @@ for frame_num, result in enumerate(
                     xyxy=boxes[i].xyxy[0],
                     confidence=boxes[i].conf[0],
                 ),
-                keypoint=Keypoint(
-                    points=keypoints[i].xy[0],
-                    confidence=keypoints[i].conf[0],
-                ),
+                keypoints=keypointDict,
             )
         )
 
