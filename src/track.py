@@ -61,16 +61,13 @@ for frame_num, result in enumerate(
     for i in range(detected_person_length):
         data.append(
             Person(
-                id=boxes[i].id.item(),
+                id=int(boxes[i].id.item()),
                 box=Box(
                     xyxy=boxes[i].xyxy[0],
-                    xyxy_normalized=boxes[i].xyxyn[0],
                     confidence=boxes[i].conf[0],
                 ),
                 keypoint=Keypoint(
                     points=keypoints[i].xy[0],
-                    points_normalized=keypoints[i].xyn[0],
-                    has_visible=keypoints[i].has_visible,
                     confidence=keypoints[i].conf[0],
                 ),
             )
