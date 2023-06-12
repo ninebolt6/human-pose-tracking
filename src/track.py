@@ -4,26 +4,24 @@ import torch
 from ultralytics import YOLO
 import json
 import os
-import time
 from tqdm import tqdm
 
 from dataclass import Box, Person, Keypoint
 from util import PersonJSONEncoder, parse_result
 
-# main
-
-started_at = time.time()
 
 VIDEO_PATH = "target.mp4"
 OUTPUT_FOLDER = "out"
 OUTPUT_NANE = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 OUTPUT_DIR = os.path.join(OUTPUT_FOLDER, OUTPUT_NANE)
 
-# Load a model
-model = YOLO("yolov8x-pose-p6.pt")
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print("using", device, "as device")
+MODEL_NAME = "yolov8x-pose-p6.pt"
 
+
+# main
+
+model = YOLO(MODEL_NAME)
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 results = model.track(
     source=VIDEO_PATH,  # 読み込むファイル
     stream=True,  # メモリを大量に食うのでstreaming処理
@@ -40,6 +38,11 @@ results = model.track(
 )
 
 os.makedirs(os.path.join(OUTPUT_DIR, "keypoints"), exist_ok=True)
+
+# 操作記録を保存
+with open(os.path.join(OUTPUT_DIR, "output_detail.json"), "w") as f:
+    json.dump({"device": device.type, "model": MODEL_NAME}, f)
+
 
 for frame_num, result in enumerate(
     tqdm(
@@ -75,8 +78,3 @@ for frame_num, result in enumerate(
 
     with open(os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num}.json"), "w") as f:
         json.dump(data, f, cls=PersonJSONEncoder)
-
-
-ended_at = time.time()
-
-print("実行時間: ", ended_at - started_at, "秒")
