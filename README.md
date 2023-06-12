@@ -8,5 +8,5 @@
 
 ```bash
 $ rye sync # 初回のみ、必要なパッケージをインストール
-$ rye run predict # プログラムの実行
+$ rye run track # プログラムの実行
 ```

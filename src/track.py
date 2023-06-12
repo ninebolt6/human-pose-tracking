@@ -13,7 +13,7 @@ from util import PersonJSONEncoder, parse_result
 
 started_at = time.time()
 
-OUTPUT_FOLDER = "./out"
+OUTPUT_FOLDER = "out"
 OUTPUT_NANE = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 OUTPUT_DIR = os.path.join(OUTPUT_FOLDER, OUTPUT_NANE)
 
@@ -23,11 +23,11 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("using", device, "as device")
 
 results: list[Results] = model.track(
-    source="./output.mp4",  # 読み込むファイル
+    source="output.mp4",  # 読み込むファイル
     stream=True,  # メモリを大量に食うのでstreaming処理
     device=device,
     imgsz=1920,
-    tracker="./bot-sort.config.yaml",  # 人物追跡のコンフィグ
+    tracker="config/bot-sort.config.yaml",  # 人物追跡のコンフィグ
     save=True,  # 検出結果を動画で保存
     verbose=False,  # ログを抑制
     line_width=2,  # boxの線の太さ
