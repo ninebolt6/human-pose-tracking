@@ -13,7 +13,7 @@ class Keypoint:
 
     def serialize(self) -> dict:
         return {
-            "point": self.xy.tolist(),
+            "xy": self.xy.tolist(),
             "confidence": self.confidence.item(),
         }
 
@@ -36,7 +36,8 @@ class Person:
         return {
             "person_id": self.person_id,
             "box": {
-                "xyxy": self.box.xyxy.tolist(),
+                "top_left_xy": self.box.xyxy[:2].tolist(),
+                "bottom_right_xy": self.box.xyxy[2:].tolist(),
                 "confidence": self.box.confidence.tolist(),
             },
             "keypoints": {
