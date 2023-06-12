@@ -1,7 +1,7 @@
 [project]
-name = "ultralystics-demo"
+name = "human-pose-tracking"
 version = "0.1.0"
-description = "Add a short description here"
+description = "姿勢推定と人物追跡を行う"
 authors = [
     { name = "ninebolt6", email = "67471674+ninebolt6@users.noreply.github.com" }
 ]

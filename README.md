@@ -1,4 +1,4 @@
-# ultralytics-demo
+# human-pose-tracking
 
 ## 環境構築
 
@@ -8,5 +8,5 @@
 
 ```bash
 $ rye sync # 初回のみ、必要なパッケージをインストール
-$ rye run track # プログラムの実行
+$ rye run track # プログラムの実行(プログラム中のファイルパス等は適宜書き換える)
 ```
