@@ -17,7 +17,9 @@ dataspace/
 *.mp4
 
 # outputs
-runs/
+out/
 
 # ultralytics files
 *.pt
+
+.vscode/
