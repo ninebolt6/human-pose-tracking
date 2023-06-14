@@ -12,7 +12,7 @@ from keypoint import KeypointEnum
 from util import PersonJSONEncoder, parse_result
 
 
-VIDEO_PATH = "target.mp4"
+VIDEO_PATH = "output.mp4"
 OUTPUT_FOLDER = "out"
 OUTPUT_NANE = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 OUTPUT_DIR = os.path.join(OUTPUT_FOLDER, OUTPUT_NANE)
@@ -47,7 +47,15 @@ os.makedirs(os.path.join(OUTPUT_DIR, "keypoints"), exist_ok=True)
 
 # 操作記録を保存
 with open(os.path.join(OUTPUT_DIR, "output_detail.json"), "w") as f:
-    json.dump({"device": device.type, "model": MODEL_NAME, "time_elapsed": 0}, f)
+    json.dump(
+        {
+            "device": device.type,
+            "model": MODEL_NAME,
+            "video_path": VIDEO_PATH,
+            "time_elapsed": 0,
+        },
+        f,
+    )
 
 
 for frame_num, result in enumerate(
@@ -94,6 +102,7 @@ with open(os.path.join(OUTPUT_DIR, "output_detail.json"), "w") as f:
         {
             "device": device.type,
             "model": MODEL_NAME,
+            "video_path": VIDEO_PATH,
             "time_elapsed": ended_at - started_at,
         },
         f,
