@@ -4,6 +4,7 @@ import torch
 from ultralytics import YOLO
 import json
 import os
+from time import time
 from tqdm import tqdm
 
 from dataclass import Box, Person, Keypoint
@@ -20,6 +21,7 @@ MODEL_NAME = "yolov8x-pose-p6.pt"
 
 
 # main
+started_at = time()
 
 model = YOLO(MODEL_NAME)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -45,7 +47,7 @@ os.makedirs(os.path.join(OUTPUT_DIR, "keypoints"), exist_ok=True)
 
 # 操作記録を保存
 with open(os.path.join(OUTPUT_DIR, "output_detail.json"), "w") as f:
-    json.dump({"device": device.type, "model": MODEL_NAME}, f)
+    json.dump({"device": device.type, "model": MODEL_NAME, "time_elapsed": 0}, f)
 
 
 for frame_num, result in enumerate(
@@ -84,3 +86,15 @@ for frame_num, result in enumerate(
 
     with open(os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num}.json"), "w") as f:
         json.dump(data, f, cls=PersonJSONEncoder)
+
+ended_at = time()
+
+with open(os.path.join(OUTPUT_DIR, "output_detail.json"), "w") as f:
+    json.dump(
+        {
+            "device": device.type,
+            "model": MODEL_NAME,
+            "time_elapsed": ended_at - started_at,
+        },
+        f,
+    )
