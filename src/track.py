@@ -33,9 +33,12 @@ results = model.track(
     verbose=False,  # ログを抑制
     line_width=2,  # boxの線の太さ
     project=OUTPUT_FOLDER,  # 保存先フォルダ
-    name=OUTPUT_NANE  # 保存先サブフォルダ
+    name=OUTPUT_NANE,  # 保存先サブフォルダ
+    agnostic_nms=False,  # 人物のみなのでオフにしてみる
     # boxes=False,  # 人物の周りに箱を表示するか
     # show_labels=False,  # 人物にラベルを表示するか
+    # conf=0.30,  # 信頼度の閾値
+    # iou=0.60,  # 重複度の閾値
 )
 
 os.makedirs(os.path.join(OUTPUT_DIR, "keypoints"), exist_ok=True)
