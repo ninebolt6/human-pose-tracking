@@ -95,60 +95,99 @@ for frame_num, result in enumerate(
 
         data.append(person)
 
-        # 変換前4点　左上　右上 左下 右下
-        src = [[430, 290], [1600, 300], [0, 900], [1920, 900]]
-        # 変換行列
-        M = trans_mat(src)
+    # 変換前4点　左上　右上 左下 右下
+    src = [[430, 290], [1600, 300], [0, 900], [1920, 900]]
+    # 変換行列
+    M = trans_mat(src)
 
-        # 射影変換・透視変換する
-        img = result.orig_img
-        output = cv2.warpPerspective(img, M, (1920, 1080))
+    # 射影変換・透視変換する
+    output = cv2.warpPerspective(result.orig_img, M, (1920, 1080))
 
-        (warped_left, warped_right) = warp_hip_points(person, M)
+    for person in data:
+        (left_now, right_now) = warp_hip_points(person, M)
 
         # 腰の2点の中点を求める
-        mid_point = mid(warped_left, warped_right).astype(int)
-
-        warped_left = warped_left.astype(int)
-        warped_right = warped_right.astype(int)
+        mid_now = mid(left_now, right_now)
 
         # 腰の2点を結ぶ線を描画
-        cv2.line(output, warped_left, warped_right, (255, 255, 255), 2, cv2.LINE_4)
+        cv2.line(
+            output,
+            left_now.astype(int),
+            right_now.astype(int),
+            (255, 255, 255),
+            2,
+            cv2.LINE_4,
+        )
         # 腰の2点を描画
-        cv2.circle(output, warped_left, 3, (255, 0, 0), -1)
-        cv2.circle(output, warped_right, 3, (0, 255, 0), -1)
+        cv2.circle(output, left_now.astype(int), 3, (255, 0, 0), -1)
+        cv2.circle(output, right_now.astype(int), 3, (0, 255, 0), -1)
         # 腰の中点を描画
-        cv2.circle(output, mid_point, 3, (0, 0, 255), -1)
+        cv2.circle(output, mid_now.astype(int), 3, (0, 0, 255), -1)
 
         before_person = next(
             filter(lambda p: p.person_id == person.person_id, before_data), None
         )
         if before_person is not None:
-            (b_warped_left, b_warped_right) = warp_hip_points(before_person, M)
+            (left_before, right_before) = warp_hip_points(before_person, M)
 
-            na = warped_left - warped_right
-            nb = b_warped_left - b_warped_right
+            mid_before = mid(left_before, right_before)
 
-            theta = calc_delta_radian(na, nb) * 180 / np.pi
-            b_mid_point = mid(b_warped_left, b_warped_right).astype(int)
+            LnMn = np.linalg.norm(mid_now - left_now)
+            LbMn = np.linalg.norm(mid_now - left_before)
+            LnLb = np.linalg.norm(left_before - left_now)
+
+            triangle_theta_1 = np.arccos(
+                (LnMn * LnMn + LbMn * LbMn - LnLb * LnLb) / (2 * LnMn * LbMn)
+            )
+
+            LbMn = np.linalg.norm(mid_now - left_before)
+            MnMb = np.linalg.norm(mid_now - mid_before)
+            LbMb = np.linalg.norm(mid_before - left_before)
+
+            triangle_theta_2 = np.arccos(
+                (LbMn * LbMn + MnMb * MnMb - LbMb * LbMb) / (2 * LbMn * MnMb)
+            )
+
+            theta = triangle_theta_1 + triangle_theta_2
 
             cv2.putText(
                 output,
-                f"{theta:.2f}deg",
-                person.keypoints[KeypointEnum.NOSE].xy.cpu().numpy().astype(int),
+                f"Person {person.person_id}: {theta:.2f}deg",
+                mid_now.astype(int),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
                 (255, 255, 255),
                 2,
                 cv2.LINE_AA,
             )
-            cv2.circle(output, b_mid_point, 3, (0, 0, 255), -1)
-            cv2.line(output, mid_point, b_mid_point, (255, 0, 255), 2, cv2.LINE_4)
 
-        cv2.imshow("frame", output)
-        cv2.waitKey(0)
+            left_before = left_before.astype(int)
+            right_before = right_before.astype(int)
+            # 腰の2点を結ぶ線を描画
+            cv2.line(
+                output,
+                left_before.astype(int),
+                right_before,
+                (255, 255, 255),
+                2,
+                cv2.LINE_4,
+            )
+            # 腰の2点を描画
+            cv2.circle(output, left_before.astype(int), 3, (255, 0, 0), -1)
+            cv2.circle(output, right_before.astype(int), 3, (0, 255, 0), -1)
 
-        # 射影変換おわり
+            cv2.circle(output, mid_before.astype(int), 3, (0, 0, 255), -1)
+            cv2.line(
+                output,
+                mid_now.astype(int),
+                mid_before.astype(int),
+                (255, 0, 255),
+                2,
+                cv2.LINE_4,
+            )
+
+    cv2.imshow("frame", output)
+    cv2.waitKey(0)
 
     before_data = data
     with open(os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num}.json"), "w") as f:
