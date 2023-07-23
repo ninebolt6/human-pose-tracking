@@ -6,7 +6,7 @@ from dataclass import Person
 from keypoint import KeypointEnum
 
 
-@dataclass
+@dataclass(frozen=True)
 class AnalysisTarget:
     left_hip: np.ndarray
     right_hip: np.ndarray
