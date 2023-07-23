@@ -4,12 +4,22 @@ import numpy as np
 from dataclass import Person
 from keypoint import KeypointEnum
 
+DESTINATION_SIZE = (1000, 563)
+
 
 def trans_mat(src) -> np.ndarray:
     # 変換前4点　左上　右上 左下 右下
     src = np.array(src, dtype=np.float32)
-    # 変換後の4点
-    dst = np.array([[0, 0], [1920, 0], [0, 1080], [1920, 1080]], dtype=np.float32)
+    # 変換後の4点　左上　右上 左下 右下
+    dst = np.array(
+        [
+            [0, 0],
+            [DESTINATION_SIZE[0], 0],
+            [0, DESTINATION_SIZE[1]],
+            [DESTINATION_SIZE[0], DESTINATION_SIZE[1]],
+        ],
+        dtype=np.float32,
+    )
     return cv2.getPerspectiveTransform(src, dst)
 
 
@@ -20,16 +30,17 @@ def warp(source: np.ndarray, trans_mat: np.ndarray) -> np.ndarray:
 
     print(x, y)
 
-    if x < 0 or x > 1920:
+    if x < 0 or x > 1000:
         x = 0
 
-    if y < 0 or y > 1080:
+    if y < 0 or y > 563:
         y = 0
 
-    if x == 0 or y == -0:
+    if x == 0 or y == 0:
         x = 0
         y = 0
-        print("out of range")
+        # TODO: Noneにしたい
+        # return None
 
     return np.array([x, y], dtype=np.float64)
 
@@ -41,7 +52,10 @@ def warp_hip_points(
     left_hip = person.keypoints[KeypointEnum.LEFT_HIP].xy.cpu().numpy()
     right_hip = person.keypoints[KeypointEnum.RIGHT_HIP].xy.cpu().numpy()
 
-    return warp(left_hip, trans_mat), warp(right_hip, trans_mat)
+    left_warped = warp(left_hip, trans_mat)
+    right_warped = warp(right_hip, trans_mat)
+
+    return left_warped, right_warped
 
 
 def mid(p1: np.ndarray, p2: np.ndarray) -> np.ndarray:

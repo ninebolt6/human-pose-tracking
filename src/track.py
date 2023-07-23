@@ -11,7 +11,7 @@ from tqdm import tqdm
 from dataclass import Box, Person, Keypoint
 from keypoint import KeypointEnum
 from util import PersonJSONEncoder, parse_result
-from calc import trans_mat, calc_delta_radian, warp_hip_points, mid
+from calc import DESTINATION_SIZE, trans_mat, warp_hip_points, mid
 
 
 VIDEO_PATH = "output.mp4"
@@ -96,12 +96,12 @@ for frame_num, result in enumerate(
         data.append(person)
 
     # 変換前4点　左上　右上 左下 右下
-    src = [[430, 290], [1600, 300], [0, 900], [1920, 900]]
+    src = [[411, 387], [1281, 390], [70, 794], [1501, 803]]
     # 変換行列
     M = trans_mat(src)
 
     # 射影変換・透視変換する
-    output = cv2.warpPerspective(result.orig_img, M, (1920, 1080))
+    output = cv2.warpPerspective(result.orig_img, M, DESTINATION_SIZE)
 
     for person in data:
         (left_now, right_now) = warp_hip_points(person, M)
