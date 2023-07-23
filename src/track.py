@@ -11,7 +11,7 @@ from tqdm import tqdm
 from dataclass import Box, Person, Keypoint
 from keypoint import KeypointEnum
 from util import PersonJSONEncoder, parse_result
-from calc import DESTINATION_SIZE, length, trans_mat, warp_hip_points, mid
+from calc import DESTINATION_SIZE, angle, trans_mat, warp_hip_points, mid
 
 
 VIDEO_PATH = "output.mp4"
@@ -132,23 +132,7 @@ for frame_num, result in enumerate(
 
             mid_before = mid(left_before, right_before)
 
-            LnMn = length(mid_now, left_now)
-            LbMn = length(mid_now, left_before)
-            LnLb = length(left_before, left_now)
-
-            triangle_theta_1 = np.arccos(
-                (LnMn * LnMn + LbMn * LbMn - LnLb * LnLb) / (2 * LnMn * LbMn)
-            )
-
-            LbMn = length(mid_now, left_before)
-            MnMb = length(mid_now, mid_before)
-            LbMb = length(mid_before, left_before)
-
-            triangle_theta_2 = np.arccos(
-                (LbMn * LbMn + MnMb * MnMb - LbMb * LbMb) / (2 * LbMn * MnMb)
-            )
-
-            theta = triangle_theta_1 + triangle_theta_2
+            theta = 90.0 - angle(mid_before, mid_now, left_before) * 180 / np.pi
 
             cv2.putText(
                 output,
