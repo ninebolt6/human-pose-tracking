@@ -114,7 +114,7 @@ for frame_num, result in enumerate(
     before_data = data
     if OUTPUT_ENABLED:
         with open(
-            os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num}.json"), "w"
+            os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num + 1}.json"), "w"
         ) as f:
             json.dump(data, f, cls=PersonJSONEncoder)
 
