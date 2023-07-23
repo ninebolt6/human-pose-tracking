@@ -20,9 +20,13 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
+dev-dependencies = [
+    "pytest~=7.4.0",
+]
 
 [tool.rye.scripts]
 track = "python src/track.py"
+test = "pytest src/tests"
 
 [[tool.rye.sources]]
 name = "pytorch"

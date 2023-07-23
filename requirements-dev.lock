@@ -16,6 +16,7 @@ cython==0.29.35
 filelock==3.12.1
 fonttools==4.39.4
 idna==3.4
+iniconfig==2.0.0
 jinja2==3.1.2
 kiwisolver==1.4.4
 lap @ git+https://github.com/DeGirum/lap
@@ -28,8 +29,10 @@ opencv-python==4.7.0.72
 packaging==23.1
 pandas==2.0.2
 pillow==9.5.0
+pluggy==1.2.0
 psutil==5.9.5
 pyparsing==3.0.9
+pytest==7.4.0
 python-dateutil==2.8.2
 pytz==2023.3
 pyyaml==6.0
