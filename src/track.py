@@ -21,6 +21,7 @@ OUTPUT_DIR = os.path.join(OUTPUT_FOLDER, OUTPUT_NANE)
 MODEL_NAME = "yolov8x-pose-p6.pt"
 OUTPUT_ENABLED = True
 
+PREVIEW_MODE = True
 
 # main
 started_at = time()
@@ -96,18 +97,19 @@ for frame_num, result in enumerate(
 
         data.append(person)
 
-    # 射影変換・透視変換する
-    output = warp_perspective(result.orig_img)
+    if PREVIEW_MODE:
+        # 射影変換・透視変換する
+        output = warp_perspective(result.orig_img)
 
-    for person in data:
-        before_person = next(
-            filter(lambda p: p.person_id == person.person_id, before_data), None
-        )
+        for person in data:
+            before_person = next(
+                filter(lambda p: p.person_id == person.person_id, before_data), None
+            )
 
-        draw_person(person, before_person, output)
+            draw_person(person, before_person, output)
 
-    cv2.imshow("frame", output)
-    cv2.waitKey(0)
+        cv2.imshow("frame", output)
+        cv2.waitKey(0)
 
     before_data = data
     if OUTPUT_ENABLED:
