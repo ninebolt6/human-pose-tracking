@@ -67,6 +67,18 @@ def length(p1: np.ndarray, p2: np.ndarray) -> np.float64:
 
 
 def angle(vertex: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> np.float64:
+    """
+    三角形の頂点と2点のなす角度を求める
+
+    引数:
+        vertex: 頂点
+        p1: 1つ目の点
+        p2: 2つ目の点
+
+    戻り値:
+        2点のなす角度(radian)
+    """
+
     a = length(vertex, p1)
     b = length(vertex, p2)
     c = length(p1, p2)
