@@ -62,8 +62,5 @@ def mid(p1: np.ndarray, p2: np.ndarray) -> np.ndarray:
     return (p1 + p2) / 2
 
 
-def calc_delta_radian(na: np.ndarray, nb: np.ndarray) -> float:
-    dot = np.dot(na, nb)
-    norm_a = np.linalg.norm(na)
-    norm_b = np.linalg.norm(nb)
-    return np.arccos(dot / (norm_a * norm_b))
+def length(p1: np.ndarray, p2: np.ndarray) -> np.float64:
+    return np.linalg.norm(p1 - p2)
