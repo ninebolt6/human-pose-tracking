@@ -2,9 +2,6 @@ import cv2
 import numpy as np
 from constant import DESTINATION_SIZE, SRC
 
-from dataclass import Person
-from keypoint import KeypointEnum
-
 
 def trans_mat() -> np.ndarray:
     # 変換前4点　左上　右上 左下 右下
@@ -74,11 +71,3 @@ def angle(vertex: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> np.float64:
 
 def to_degree(radian: np.float64) -> np.float64:
     return radian * 180 / np.pi
-
-
-def extract_points(person: Person) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    left_hip = person.keypoints[KeypointEnum.LEFT_HIP].xy.cpu().numpy()
-    right_hip = person.keypoints[KeypointEnum.RIGHT_HIP].xy.cpu().numpy()
-    mid_point = mid(left_hip, right_hip)
-
-    return left_hip, right_hip, mid_point
