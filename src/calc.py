@@ -1,15 +1,14 @@
 import cv2
 import numpy as np
+from constant import DESTINATION_SIZE, SRC
 
 from dataclass import Person
 from keypoint import KeypointEnum
 
-DESTINATION_SIZE = (1000, 563)
 
-
-def trans_mat(src) -> np.ndarray:
+def trans_mat() -> np.ndarray:
     # 変換前4点　左上　右上 左下 右下
-    src = np.array(src, dtype=np.float32)
+    src = np.array(SRC, dtype=np.float32)
     # 変換後の4点　左上　右上 左下 右下
     dst = np.array(
         [
@@ -23,8 +22,8 @@ def trans_mat(src) -> np.ndarray:
     return cv2.getPerspectiveTransform(src, dst)
 
 
-def warp(source: np.ndarray, trans_mat: np.ndarray) -> np.ndarray:
-    A = np.dot(trans_mat, np.concatenate((source, [1]), axis=0))
+def warp(source: np.ndarray) -> np.ndarray:
+    A = np.dot(trans_mat(), np.concatenate((source, [1]), axis=0))
     x = A[0] / A[2]
     y = A[1] / A[2]
 
@@ -43,19 +42,6 @@ def warp(source: np.ndarray, trans_mat: np.ndarray) -> np.ndarray:
         # return None
 
     return np.array([x, y], dtype=np.float64)
-
-
-def warp_hip_points(
-    person: Person,
-    trans_mat: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
-    left_hip = person.keypoints[KeypointEnum.LEFT_HIP].xy.cpu().numpy()
-    right_hip = person.keypoints[KeypointEnum.RIGHT_HIP].xy.cpu().numpy()
-
-    left_warped = warp(left_hip, trans_mat)
-    right_warped = warp(right_hip, trans_mat)
-
-    return left_warped, right_warped
 
 
 def mid(p1: np.ndarray, p2: np.ndarray) -> np.ndarray:
@@ -88,3 +74,11 @@ def angle(vertex: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> np.float64:
 
 def to_degree(radian: np.float64) -> np.float64:
     return radian * 180 / np.pi
+
+
+def extract_points(person: Person) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    left_hip = person.keypoints[KeypointEnum.LEFT_HIP].xy.cpu().numpy()
+    right_hip = person.keypoints[KeypointEnum.RIGHT_HIP].xy.cpu().numpy()
+    mid_point = mid(left_hip, right_hip)
+
+    return left_hip, right_hip, mid_point

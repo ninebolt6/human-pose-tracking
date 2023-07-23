@@ -1,22 +1,20 @@
 import cv2
 
-from calc import DESTINATION_SIZE, angle, mid, to_degree, trans_mat, warp_hip_points
-
-# 変換前4点　左上　右上 左下 右下
-SRC = [[411, 387], [1281, 390], [70, 794], [1501, 803]]
-# 変換行列
-M = trans_mat(SRC)
+from calc import (
+    angle,
+    extract_points,
+    to_degree,
+    trans_mat,
+)
+from constant import DESTINATION_SIZE
 
 
 def warp_perspective(img):
-    return cv2.warpPerspective(img, M, DESTINATION_SIZE)
+    return cv2.warpPerspective(img, trans_mat(), DESTINATION_SIZE)
 
 
 def draw_person(person_data, before_person_data, output):
-    (left_now, right_now) = warp_hip_points(person_data, M)
-
-    # 腰の2点の中点を求める
-    mid_now = mid(left_now, right_now)
+    (left_now, right_now, mid_now) = extract_points(person_data)
 
     # 腰の2点を結ぶ線を描画
     cv2.line(
@@ -34,9 +32,7 @@ def draw_person(person_data, before_person_data, output):
     cv2.circle(output, mid_now.astype(int), 3, (0, 0, 255), -1)
 
     if before_person_data is not None:
-        (left_before, right_before) = warp_hip_points(before_person_data, M)
-
-        mid_before = mid(left_before, right_before)
+        (left_before, right_before, mid_before) = extract_points(before_person_data)
 
         theta = 90.0 - to_degree(angle(mid_before, mid_now, left_before))
 
@@ -51,8 +47,6 @@ def draw_person(person_data, before_person_data, output):
             cv2.LINE_AA,
         )
 
-        left_before = left_before.astype(int)
-        right_before = right_before.astype(int)
         # 腰の2点を結ぶ線を描画
         cv2.line(
             output,
