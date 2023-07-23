@@ -20,6 +20,7 @@ OUTPUT_NANE = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 OUTPUT_DIR = os.path.join(OUTPUT_FOLDER, OUTPUT_NANE)
 
 MODEL_NAME = "yolov8x-pose-p6.pt"
+OUTPUT_ENABLED = True
 
 
 # main
@@ -33,7 +34,7 @@ results = model.track(
     device=device,
     imgsz=1920,
     tracker="config/bot-sort.config.yaml",  # 人物追跡のコンフィグ
-    save=True,  # 検出結果を動画で保存
+    save=OUTPUT_ENABLED,  # 検出結果を動画で保存
     verbose=False,  # ログを抑制
     line_width=2,  # boxの線の太さ
     project=OUTPUT_FOLDER,  # 保存先フォルダ
@@ -45,19 +46,20 @@ results = model.track(
     # iou=0.60,  # 重複度の閾値
 )
 
-os.makedirs(os.path.join(OUTPUT_DIR, "keypoints"), exist_ok=True)
+if OUTPUT_ENABLED:
+    os.makedirs(os.path.join(OUTPUT_DIR, "keypoints"), exist_ok=True)
 
-# 操作記録を保存
-with open(os.path.join(OUTPUT_DIR, "output_detail.json"), "w") as f:
-    json.dump(
-        {
-            "device": device.type,
-            "model": MODEL_NAME,
-            "video_path": VIDEO_PATH,
-            "time_elapsed": 0,
-        },
-        f,
-    )
+    # 操作記録を保存
+    with open(os.path.join(OUTPUT_DIR, "output_detail.json"), "w") as f:
+        json.dump(
+            {
+                "device": device.type,
+                "model": MODEL_NAME,
+                "video_path": VIDEO_PATH,
+                "time_elapsed": 0,
+            },
+            f,
+        )
 
 before_data: list[Person] = []
 
@@ -174,18 +176,22 @@ for frame_num, result in enumerate(
     cv2.waitKey(0)
 
     before_data = data
-    with open(os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num}.json"), "w") as f:
-        json.dump(data, f, cls=PersonJSONEncoder)
+    if OUTPUT_ENABLED:
+        with open(
+            os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num}.json"), "w"
+        ) as f:
+            json.dump(data, f, cls=PersonJSONEncoder)
 
-ended_at = time()
 
-with open(os.path.join(OUTPUT_DIR, "output_detail.json"), "w") as f:
-    json.dump(
-        {
-            "device": device.type,
-            "model": MODEL_NAME,
-            "video_path": VIDEO_PATH,
-            "time_elapsed": ended_at - started_at,
-        },
-        f,
-    )
+if OUTPUT_ENABLED:
+    ended_at = time()
+    with open(os.path.join(OUTPUT_DIR, "output_detail.json"), "w") as f:
+        json.dump(
+            {
+                "device": device.type,
+                "model": MODEL_NAME,
+                "video_path": VIDEO_PATH,
+                "time_elapsed": ended_at - started_at,
+            },
+            f,
+        )
