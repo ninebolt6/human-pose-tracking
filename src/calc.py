@@ -16,7 +16,7 @@ def trans_mat(src) -> np.ndarray:
             [0, 0],
             [DESTINATION_SIZE[0], 0],
             [0, DESTINATION_SIZE[1]],
-            [DESTINATION_SIZE[0], DESTINATION_SIZE[1]],
+            DESTINATION_SIZE,
         ],
         dtype=np.float32,
     )
