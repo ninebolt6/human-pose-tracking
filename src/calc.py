@@ -64,3 +64,11 @@ def mid(p1: np.ndarray, p2: np.ndarray) -> np.ndarray:
 
 def length(p1: np.ndarray, p2: np.ndarray) -> np.float64:
     return np.linalg.norm(p1 - p2)
+
+
+def angle(vertex: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> np.float64:
+    a = length(vertex, p1)
+    b = length(vertex, p2)
+    c = length(p1, p2)
+
+    return np.arccos((a**2 + b**2 - c**2) / (2 * a * b))
