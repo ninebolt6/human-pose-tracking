@@ -84,3 +84,7 @@ def angle(vertex: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> np.float64:
     c = length(p1, p2)
 
     return np.arccos((a**2 + b**2 - c**2) / (2 * a * b))
+
+
+def to_degree(radian: np.float64) -> np.float64:
+    return radian * 180 / np.pi

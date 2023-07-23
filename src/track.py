@@ -1,6 +1,5 @@
 import cv2
 from datetime import datetime
-import numpy as np
 import torch
 from ultralytics import YOLO
 import json
@@ -11,7 +10,7 @@ from tqdm import tqdm
 from dataclass import Box, Person, Keypoint
 from keypoint import KeypointEnum
 from util import PersonJSONEncoder, parse_result
-from calc import DESTINATION_SIZE, angle, trans_mat, warp_hip_points, mid
+from calc import DESTINATION_SIZE, angle, to_degree, trans_mat, warp_hip_points, mid
 
 
 VIDEO_PATH = "output.mp4"
@@ -134,7 +133,7 @@ for frame_num, result in enumerate(
 
             mid_before = mid(left_before, right_before)
 
-            theta = 90.0 - angle(mid_before, mid_now, left_before) * 180 / np.pi
+            theta = 90.0 - to_degree(angle(mid_before, mid_now, left_before))
 
             cv2.putText(
                 output,
