@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import torch
+import numpy as np
 
 from keypoint import KeypointEnum
 
@@ -7,9 +7,9 @@ from keypoint import KeypointEnum
 @dataclass(frozen=True)
 class Keypoint:
     # キーポイントの座標
-    xy: torch.Tensor
+    xy: np.ndarray
     # キーポイントの確度
-    confidence: torch.Tensor
+    confidence: np.ndarray
 
     def serialize(self) -> dict:
         return {
@@ -21,9 +21,9 @@ class Keypoint:
 @dataclass(frozen=True)
 class Box:
     # 左上、右下の座標
-    xyxy: torch.Tensor
+    xyxy: np.ndarray
     # 確度
-    confidence: torch.Tensor
+    confidence: np.ndarray
 
 
 @dataclass(frozen=True)

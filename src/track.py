@@ -82,15 +82,15 @@ for frame_num, result in enumerate(
 
         for keypointIndex in KeypointEnum:
             keypointDict[keypointIndex] = Keypoint(
-                xy=keypoints[i].xy[0][keypointIndex.value],
-                confidence=keypoints[i].conf[0][keypointIndex.value],
+                xy=keypoints[i].xy[0][keypointIndex.value].cpu().numpy(),
+                confidence=keypoints[i].conf[0][keypointIndex.value].cpu().numpy(),
             )
 
         person = Person(
             person_id=int(boxes[i].id.item()),
             box=Box(
-                xyxy=boxes[i].xyxy[0],
-                confidence=boxes[i].conf[0],
+                xyxy=boxes[i].xyxy[0].cpu().numpy(),
+                confidence=boxes[i].conf[0].cpu().numpy(),
             ),
             keypoints=keypointDict,
         )

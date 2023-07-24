@@ -25,7 +25,7 @@ class WarpedAnalysisTarget:
 
 
 def extract_points(person: Person) -> AnalysisTarget:
-    left_hip = person.keypoints[KeypointEnum.LEFT_HIP].xy.cpu().numpy()
-    right_hip = person.keypoints[KeypointEnum.RIGHT_HIP].xy.cpu().numpy()
+    left_hip = person.keypoints[KeypointEnum.LEFT_HIP].xy
+    right_hip = person.keypoints[KeypointEnum.RIGHT_HIP].xy
 
     return AnalysisTarget(left_hip, right_hip)
