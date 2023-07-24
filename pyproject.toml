@@ -10,6 +10,7 @@ dependencies = [
     "ultralytics~=8.0.114",
     "setuptools~=67.8.0",
     "tqdm~=4.65.0",
+    "natsort~=8.4.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
