@@ -24,8 +24,6 @@ def warp(source: np.ndarray) -> np.ndarray:
     x = A[0] / A[2]
     y = A[1] / A[2]
 
-    print(x, y)
-
     if x < 0 or x > 1000:
         x = 0
 
