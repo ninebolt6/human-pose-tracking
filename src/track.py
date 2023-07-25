@@ -63,6 +63,7 @@ def track():
             )
 
     before_data: list[Person] = []
+    person_id_set = set()
 
     for frame_num, result in enumerate(
         tqdm(
@@ -76,6 +77,7 @@ def track():
 
         # print("found", detected_person_length, "person on frame", frame_num)
 
+        person_ids_in_frame = set()
         data: list[Person] = []
 
         for i in range(detected_person_length):
@@ -96,6 +98,7 @@ def track():
                 keypoints=keypointDict,
             )
 
+            person_ids_in_frame.add(person.person_id)
             data.append(person)
 
         if PREVIEW_MODE:
@@ -112,7 +115,9 @@ def track():
             cv2.imshow("frame", output)
             cv2.waitKey(0)
 
+        person_id_set.update(person_ids_in_frame)
         before_data = data
+
         if OUTPUT_ENABLED:
             with open(
                 os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num + 1}.json"), "w"
@@ -128,6 +133,7 @@ def track():
                     "model": MODEL_NAME,
                     "video_path": VIDEO_PATH,
                     "time_elapsed": ended_at - started_at,
+                    "max_person_count": max(person_id_set),
                 },
                 f,
             )
