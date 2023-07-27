@@ -7,7 +7,7 @@ from natsort import natsorted
 from dataclass import Person
 
 from track import OUTPUT_FOLDER
-from usecase import WarpedAnalysisTarget, extract_points
+from usecase import WarpedAnalysisTarget
 from util import as_person
 
 TARGET_FOLDER = "20230724_234531"
@@ -58,8 +58,7 @@ def convert():
                 }
 
                 for person in current_list:
-                    target = extract_points(person)
-                    warped_target = WarpedAnalysisTarget(target)
+                    warped_target = WarpedAnalysisTarget(person)
 
                     if (
                         warped_target.mid_point[0] == 0

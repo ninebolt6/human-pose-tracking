@@ -6,7 +6,7 @@ from calc import (
     trans_mat,
 )
 from constant import DESTINATION_SIZE
-from usecase import WarpedAnalysisTarget, extract_points
+from usecase import WarpedAnalysisTarget
 
 
 def warp_perspective(img):
@@ -14,8 +14,7 @@ def warp_perspective(img):
 
 
 def draw_person(person_data, before_person_data, output):
-    now_analysis_target = extract_points(person_data)
-    now_warped_analysis_target = WarpedAnalysisTarget(now_analysis_target)
+    now_warped_analysis_target = WarpedAnalysisTarget(person_data)
 
     left_now = now_warped_analysis_target.left_hip
     right_now = now_warped_analysis_target.right_hip
@@ -37,8 +36,7 @@ def draw_person(person_data, before_person_data, output):
     cv2.circle(output, mid_now.astype(int), 3, (0, 0, 255), -1)
 
     if before_person_data is not None:
-        before_analysis_target = extract_points(before_person_data)
-        before_warped_analysis_target = WarpedAnalysisTarget(before_analysis_target)
+        before_warped_analysis_target = WarpedAnalysisTarget(before_person_data)
 
         left_before = before_warped_analysis_target.left_hip
         right_before = before_warped_analysis_target.right_hip
