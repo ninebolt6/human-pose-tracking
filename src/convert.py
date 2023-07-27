@@ -5,10 +5,12 @@ import os
 
 from natsort import natsorted
 from dataclass import Person
+from keypoint import KeypointEnum
 
 from track import OUTPUT_FOLDER
-from usecase import WarpedAnalysisTarget
+from usecase import Midpoint, warp_keypoints
 from util import as_person
+
 
 TARGET_FOLDER = "20230724_234531"
 CSV_OUTPUT_FOLDER = os.path.join(OUTPUT_FOLDER, TARGET_FOLDER)
@@ -58,16 +60,16 @@ def convert():
                 }
 
                 for person in current_list:
-                    warped_target = WarpedAnalysisTarget(person)
+                    warped_keypoints = warp_keypoints(person.keypoints)
+                    left_point = warped_keypoints[KeypointEnum.LEFT_HIP]
+                    right_point = warped_keypoints[KeypointEnum.RIGHT_HIP]
+                    mid_point = Midpoint(left_point, right_point)
 
-                    if (
-                        warped_target.mid_point[0] == 0
-                        and warped_target.mid_point[1] == 0
-                    ):
+                    if mid_point.xy[0] == 0 and mid_point.xy[1] == 0:
                         continue
 
-                    row_dict[f"id:{person.person_id} x"] = warped_target.mid_point[0]
-                    row_dict[f"id:{person.person_id} y"] = warped_target.mid_point[1]
+                    row_dict[f"id:{person.person_id} x"] = mid_point.xy[0]
+                    row_dict[f"id:{person.person_id} y"] = mid_point.xy[1]
 
                 writer.writerow(row_dict)
 

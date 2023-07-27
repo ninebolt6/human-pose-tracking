@@ -39,10 +39,6 @@ def warp(source: np.ndarray) -> np.ndarray:
     return np.array([x, y], dtype=np.float64)
 
 
-def mid(p1: np.ndarray, p2: np.ndarray) -> np.ndarray:
-    return (p1 + p2) / 2
-
-
 def length(p1: np.ndarray, p2: np.ndarray) -> np.float64:
     return np.linalg.norm(p1 - p2)
 

@@ -1,18 +1,32 @@
 from dataclasses import dataclass
 
 import numpy as np
-from calc import mid, warp
-from dataclass import Person
+from calc import warp
+from dataclass import Keypoint
 from keypoint import KeypointEnum
 
 
 @dataclass
-class WarpedAnalysisTarget:
-    left_hip: np.ndarray
-    right_hip: np.ndarray
-    mid_point: np.ndarray
+class WarpedKeypoint:
+    xy: np.ndarray
+    confidence: np.ndarray
 
-    def __init__(self, person: Person):
-        self.left_hip = warp(person.keypoints[KeypointEnum.LEFT_HIP].xy)
-        self.right_hip = warp(person.keypoints[KeypointEnum.RIGHT_HIP].xy)
-        self.mid_point = mid(self.left_hip, self.right_hip)
+    def __init__(self, keypoint: Keypoint):
+        self.xy = warp(keypoint.xy)
+        self.confidence = keypoint.confidence
+
+
+@dataclass
+class Midpoint:
+    xy: np.ndarray
+    confidence: np.ndarray
+
+    def __init__(self, p1: Keypoint | WarpedKeypoint, p2: Keypoint | WarpedKeypoint):
+        self.xy = (p1.xy + p2.xy) / 2.0
+        self.confidence = np.min([p1.confidence, p2.confidence])
+
+
+def warp_keypoints(
+    keypoints: dict[KeypointEnum, Keypoint]
+) -> dict[KeypointEnum, WarpedKeypoint]:
+    return {key: WarpedKeypoint(value) for (key, value) in keypoints.items()}
