@@ -2,8 +2,8 @@ import collections
 from itertools import islice
 from json import JSONEncoder
 import numpy as np
-from ultralytics.yolo.v8.pose.predict import Results
-from ultralytics.yolo.engine.results import Boxes, Keypoints
+from ultralytics.models.yolo.pose.predict import Results
+from ultralytics.engine.results import Boxes, Keypoints
 
 from dataclass import Box, Keypoint, Person
 from keypoint import KeypointEnum
