@@ -26,7 +26,5 @@ class Midpoint:
         self.confidence = np.min([p1.confidence, p2.confidence])
 
 
-def warp_keypoints(
-    keypoints: dict[KeypointEnum, Keypoint]
-) -> dict[KeypointEnum, WarpedKeypoint]:
+def warp_keypoints(keypoints: dict[KeypointEnum, Keypoint]) -> dict[KeypointEnum, WarpedKeypoint]:
     return {key: WarpedKeypoint(value) for (key, value) in keypoints.items()}

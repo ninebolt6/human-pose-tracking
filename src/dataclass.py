@@ -40,7 +40,5 @@ class Person:
                 "bottom_right_xy": self.box.xyxy[2:].tolist(),
                 "confidence": self.box.confidence.tolist(),
             },
-            "keypoints": {
-                key.name: value.serialize() for (key, value) in self.keypoints.items()
-            },
+            "keypoints": {key.name: value.serialize() for (key, value) in self.keypoints.items()},
         }

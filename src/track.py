@@ -106,9 +106,7 @@ def track():
             output = warp_perspective(result.orig_img)
 
             for person in data:
-                before_person = next(
-                    filter(lambda p: p.person_id == person.person_id, before_data), None
-                )
+                before_person = next(filter(lambda p: p.person_id == person.person_id, before_data), None)
 
                 draw_person(person, before_person, output)
 
@@ -119,9 +117,7 @@ def track():
         before_data = data
 
         if OUTPUT_ENABLED:
-            with open(
-                os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num + 1}.json"), "w"
-            ) as f:
+            with open(os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num + 1}.json"), "w") as f:
                 json.dump(data, f, cls=PersonJSONEncoder)
 
     if OUTPUT_ENABLED:
