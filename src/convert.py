@@ -61,15 +61,15 @@ def convert():
 
                 for person in current_list:
                     warped_keypoints = warp_keypoints(person.keypoints)
-                    left_point = warped_keypoints[KeypointEnum.LEFT_HIP]
-                    right_point = warped_keypoints[KeypointEnum.RIGHT_HIP]
-                    mid_point = Midpoint(left_point, right_point)
 
-                    if mid_point.xy[0] == 0 and mid_point.xy[1] == 0:
+                    # 位置座標
+                    person_position = warped_keypoints[KeypointEnum.LEFT_ANKLE]
+
+                    if person_position.xy[0] == 0 and person_position.xy[1] == 0:
                         continue
 
-                    row_dict[f"id:{person.person_id} x"] = mid_point.xy[0]
-                    row_dict[f"id:{person.person_id} y"] = mid_point.xy[1]
+                    row_dict[f"id:{person.person_id} x"] = person_position.xy[0]
+                    row_dict[f"id:{person.person_id} y"] = person_position.xy[1]
 
                 writer.writerow(row_dict)
 
