@@ -49,7 +49,9 @@ def convert():
         os.path.join(CSV_OUTPUT_FOLDER, f"out_position_{EXEC_TIME}.csv"), "w", encoding="utf-8", newline=""
     ) as position_out, open(
         os.path.join(CSV_OUTPUT_FOLDER, f"out_distance_degree_{EXEC_TIME}.csv"), "w", encoding="utf-8", newline=""
-    ) as distance_degree_out:
+    ) as distance_degree_out, open(
+        os.path.join(CSV_OUTPUT_FOLDER, f"out_relative_position_{EXEC_TIME}.csv"), "w", encoding="utf-8", newline=""
+    ) as relative_position_out:
         # 位置座標
         position_header = ["frame_num"]
         position_header.extend(
@@ -70,6 +72,17 @@ def convert():
         # 前のフレームがないので空行を書き込む
         distance_degree_writer.writerow({"frame_num": get_frame_num("1")})
 
+        # 相対位置座標
+        relative_position_header = ["frame_num"]
+        relative_position_header.extend(
+            # flatten
+            chain.from_iterable(map(lambda id: create_position_header(id), range(1, max_person_count + 1)))
+        )
+        relative_position_writer = csv.DictWriter(relative_position_out, fieldnames=relative_position_header)
+        relative_position_writer.writeheader()
+        # 前のフレームがないので空行を書き込む
+        relative_position_writer.writerow({"frame_num": get_frame_num("1")})
+
         for window in sliding_window(files, 2):
             (filename, next_filename) = cast(tuple[str, str], window)
 
@@ -87,6 +100,7 @@ def convert():
             next_frame_num = get_frame_num(next_filename)
             position_dict = {"frame_num": current_frame_num}
             distance_degree_dict = {"frame_num": next_frame_num}
+            relative_position_dict = {"frame_num": next_frame_num}
 
             for person_id in range(1, max_person_count + 1):
                 if current_person_dict.get(person_id) is not None:
@@ -119,9 +133,21 @@ def convert():
                         distance_degree_dict[distance_degree_person_header[0]] = str(distance)
                         distance_degree_dict[distance_degree_person_header[1]] = str(degree)
 
+                        # 相対位置座標
+                        next_person_position = next_warped_keypoints[KeypointEnum.LEFT_ANKLE]
+                        if not (next_person_position.xy[0] == 0 and next_person_position.xy[1] == 0):
+                            relative_position_header = create_position_header(person_id)
+                            relative_position_dict[relative_position_header[0]] = (
+                                next_person_position.xy[0] - current_person_position.xy[0]
+                            )
+                            relative_position_dict[relative_position_header[1]] = (
+                                next_person_position.xy[1] - current_person_position.xy[1]
+                            )
+
             # 書き込み
             position_writer.writerow(position_dict)
             distance_degree_writer.writerow(distance_degree_dict)
+            relative_position_writer.writerow(relative_position_dict)
 
 
 if __name__ == "__main__":
