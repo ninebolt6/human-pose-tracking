@@ -19,6 +19,10 @@ KEYPOINT_JSON_PATH = os.path.join(OUTPUT_FOLDER, TARGET_FOLDER, "keypoints")
 EXEC_TIME = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
 
+def create_position_header(id: int) -> list[str]:
+    return [f"id:{id} x", f"id:{id} y"]
+
+
 def convert():
     if not os.path.isdir(KEYPOINT_JSON_PATH):
         exit(1)
@@ -37,7 +41,7 @@ def convert():
         position_header = ["frame_num"]
         position_header.extend(
             # flatten
-            chain.from_iterable(map(lambda id: [f"id:{id} x", f"id:{id} y"], range(1, max_person_count + 1)))
+            chain.from_iterable(map(lambda id: create_position_header(id), range(1, max_person_count + 1)))
         )
         position_writer = csv.DictWriter(position_out, fieldnames=position_header)
         position_writer.writeheader()
@@ -46,7 +50,7 @@ def convert():
             with open(os.path.join(KEYPOINT_JSON_PATH, filename)) as f1:
                 current_list: list[Person] = json.load(f1, object_hook=as_person)
 
-            row_dict = {"frame_num": filename.replace(".json", "").replace("frame_", "")}
+            position_dict = {"frame_num": filename.replace(".json", "").replace("frame_", "")}
 
             for person in current_list:
                 warped_keypoints = warp_keypoints(person.keypoints)
@@ -57,10 +61,11 @@ def convert():
                 if person_position.xy[0] == 0 and person_position.xy[1] == 0:
                     continue
 
-                row_dict[f"id:{person.person_id} x"] = person_position.xy[0]
-                row_dict[f"id:{person.person_id} y"] = person_position.xy[1]
+                position_header = create_position_header(person.person_id)
+                position_dict[position_header[0]] = person_position.xy[0]
+                position_dict[position_header[1]] = person_position.xy[1]
 
-            position_writer.writerow(row_dict)
+            position_writer.writerow(position_dict)
 
 
 if __name__ == "__main__":
