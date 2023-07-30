@@ -25,11 +25,11 @@ def get_frame_num(filename: str) -> str:
     return filename.replace("frame_", "").replace(".json", "")
 
 
-def create_position_header(id: int) -> list[str]:
+def get_position_header(id: int) -> list[str]:
     return [f"id:{id} x", f"id:{id} y"]
 
 
-def create_distance_degree_header(id: int) -> list[str]:
+def get_distance_degree_header(id: int) -> list[str]:
     return [f"id:{id} dist", f"id:{id} deg"]
 
 
@@ -56,7 +56,7 @@ def convert():
         position_header = ["frame_num"]
         position_header.extend(
             # flatten
-            chain.from_iterable(map(lambda id: create_position_header(id), range(1, max_person_count + 1)))
+            chain.from_iterable(map(lambda id: get_position_header(id), range(1, max_person_count + 1)))
         )
         position_writer = csv.DictWriter(position_out, fieldnames=position_header)
         position_writer.writeheader()
@@ -65,7 +65,7 @@ def convert():
         distance_degree_header = ["frame_num"]
         distance_degree_header.extend(
             # flatten
-            chain.from_iterable(map(lambda id: create_distance_degree_header(id), range(1, max_person_count + 1)))
+            chain.from_iterable(map(lambda id: get_distance_degree_header(id), range(1, max_person_count + 1)))
         )
         distance_degree_writer = csv.DictWriter(distance_degree_out, fieldnames=distance_degree_header)
         distance_degree_writer.writeheader()
@@ -76,7 +76,7 @@ def convert():
         relative_position_header = ["frame_num"]
         relative_position_header.extend(
             # flatten
-            chain.from_iterable(map(lambda id: create_position_header(id), range(1, max_person_count + 1)))
+            chain.from_iterable(map(lambda id: get_position_header(id), range(1, max_person_count + 1)))
         )
         relative_position_writer = csv.DictWriter(relative_position_out, fieldnames=relative_position_header)
         relative_position_writer.writeheader()
@@ -113,9 +113,9 @@ def convert():
                     # 位置座標
                     current_person_position = current_warped_keypoints[KeypointEnum.LEFT_ANKLE]
                     if not (current_person_position.xy[0] == 0 and current_person_position.xy[1] == 0):
-                        position_person_header = create_position_header(person_id)
-                        position_dict[position_person_header[0]] = current_person_position.xy[0]
-                        position_dict[position_person_header[1]] = current_person_position.xy[1]
+                        position_header = get_position_header(person_id)
+                        position_dict[position_header[0]] = current_person_position.xy[0]
+                        position_dict[position_header[1]] = current_person_position.xy[1]
 
                     if next_person_dict.get(person_id) is not None:
                         next_warped_keypoints = warp_keypoints(next_person_dict[person_id].keypoints)
@@ -129,14 +129,14 @@ def convert():
                             current_middle_hip, next_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
                         )
 
-                        distance_degree_person_header = create_distance_degree_header(person_id)
+                        distance_degree_person_header = get_distance_degree_header(person_id)
                         distance_degree_dict[distance_degree_person_header[0]] = str(distance)
                         distance_degree_dict[distance_degree_person_header[1]] = str(degree)
 
                         # 相対位置座標
                         next_person_position = next_warped_keypoints[KeypointEnum.LEFT_ANKLE]
                         if not (next_person_position.xy[0] == 0 and next_person_position.xy[1] == 0):
-                            relative_position_header = create_position_header(person_id)
+                            relative_position_header = get_position_header(person_id)
                             relative_position_dict[relative_position_header[0]] = (
                                 next_person_position.xy[0] - current_person_position.xy[0]
                             )
