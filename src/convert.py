@@ -98,12 +98,10 @@ def convert():
 
                     # 位置座標
                     current_person_position = current_warped_keypoints[KeypointEnum.LEFT_ANKLE]
-                    if current_person_position.xy[0] == 0 and current_person_position.xy[1] == 0:
-                        continue
-
-                    position_person_header = create_position_header(person_id)
-                    position_dict[position_person_header[0]] = current_person_position.xy[0]
-                    position_dict[position_person_header[1]] = current_person_position.xy[1]
+                    if not (current_person_position.xy[0] == 0 and current_person_position.xy[1] == 0):
+                        position_person_header = create_position_header(person_id)
+                        position_dict[position_person_header[0]] = current_person_position.xy[0]
+                        position_dict[position_person_header[1]] = current_person_position.xy[1]
 
                     if next_person_dict.get(person_id) is not None:
                         next_warped_keypoints = warp_keypoints(next_person_dict[person_id].keypoints)
