@@ -6,6 +6,7 @@ import os
 from typing import cast
 
 from natsort import natsorted
+from tqdm import tqdm
 from calc import length
 from dataclass import Person
 from keypoint import KeypointEnum
@@ -83,7 +84,7 @@ def convert():
         # 前のフレームがないので空行を書き込む
         relative_position_writer.writerow({"frame_num": get_frame_num("1")})
 
-        for window in sliding_window(files, 2):
+        for window in tqdm(sliding_window(files, 2), unit="frame", total=len(files) - 1):
             (filename, next_filename) = cast(tuple[str, str], window)
 
             with open(os.path.join(KEYPOINT_JSON_PATH, filename)) as current_file, open(
