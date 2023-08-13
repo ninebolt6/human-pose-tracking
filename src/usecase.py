@@ -24,7 +24,7 @@ class Midpoint:
 
     def __init__(self, p1: Keypoint | WarpedKeypoint, p2: Keypoint | WarpedKeypoint):
         self.xy = (p1.xy + p2.xy) / 2.0
-        self.confidence = np.min([p1.confidence, p2.confidence])
+        self.confidence = p1.confidence * p2.confidence
 
 
 def warp_keypoints(keypoints: dict[KeypointEnum, Keypoint]) -> dict[KeypointEnum, WarpedKeypoint]:
