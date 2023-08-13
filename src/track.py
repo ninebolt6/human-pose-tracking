@@ -7,38 +7,33 @@ import os
 from time import time
 from tqdm import tqdm
 
+from config import get_track_config
 from dataclass import Box, Person, Keypoint
 from draw import draw_person, warp_perspective
 from keypoint import KeypointEnum
 from util import PersonJSONEncoder, parse_result
 
+config = get_track_config()
 
-VIDEO_PATH = "output.mp4"
-OUTPUT_FOLDER = "out"
 OUTPUT_NANE = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-OUTPUT_DIR = os.path.join(OUTPUT_FOLDER, OUTPUT_NANE)
-
-MODEL_NAME = "yolov8x-pose-p6.pt"
-OUTPUT_ENABLED = True
-
-PREVIEW_MODE = True
+OUTPUT_DIR = os.path.join(config.OutputPath, OUTPUT_NANE)
 
 
 def track():
     started_at = time()
 
-    model = YOLO(MODEL_NAME)
+    model = YOLO(config.ModelName)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     results = model.track(
-        source=VIDEO_PATH,  # 読み込むファイル
+        source=config.InputPath,  # 読み込むファイル
         stream=True,  # メモリを大量に食うのでstreaming処理
         device=device,
         imgsz=1920,
         tracker="config/bot-sort.config.yaml",  # 人物追跡のコンフィグ
-        save=OUTPUT_ENABLED,  # 検出結果を動画で保存
+        save=config.OutputEnabled,  # 検出結果を動画で保存
         verbose=False,  # ログを抑制
         line_width=2,  # boxの線の太さ
-        project=OUTPUT_FOLDER,  # 保存先フォルダ
+        project=OUTPUT_DIR,  # 保存先フォルダ
         name=OUTPUT_NANE,  # 保存先サブフォルダ
         agnostic_nms=False,  # 人物のみなのでオフにしてみる
         # boxes=False,  # 人物の周りに箱を表示するか
@@ -47,7 +42,7 @@ def track():
         # iou=0.60,  # 重複度の閾値
     )
 
-    if OUTPUT_ENABLED:
+    if config.OutputEnabled:
         os.makedirs(os.path.join(OUTPUT_DIR, "keypoints"), exist_ok=True)
 
         # 操作記録を保存
@@ -55,8 +50,8 @@ def track():
             json.dump(
                 {
                     "device": device.type,
-                    "model": MODEL_NAME,
-                    "video_path": VIDEO_PATH,
+                    "model": config.ModelName,
+                    "video_path": config.InputPath,
                     "time_elapsed": 0,
                 },
                 f,
@@ -68,7 +63,7 @@ def track():
     for frame_num, result in enumerate(
         tqdm(
             results,
-            total=int(cv2.VideoCapture(VIDEO_PATH).get(cv2.CAP_PROP_FRAME_COUNT)),
+            total=int(cv2.VideoCapture(config.InputPath).get(cv2.CAP_PROP_FRAME_COUNT)),
             unit="frame",
         )
     ):
@@ -101,7 +96,7 @@ def track():
             person_ids_in_frame.add(person.person_id)
             data.append(person)
 
-        if PREVIEW_MODE:
+        if config.ShowPreview:
             # 射影変換・透視変換する
             output = warp_perspective(result.orig_img)
 
@@ -116,18 +111,18 @@ def track():
         person_id_set.update(person_ids_in_frame)
         before_data = data
 
-        if OUTPUT_ENABLED:
+        if config.OutputEnabled:
             with open(os.path.join(OUTPUT_DIR, f"keypoints/frame_{frame_num + 1}.json"), "w") as f:
                 json.dump(data, f, cls=PersonJSONEncoder)
 
-    if OUTPUT_ENABLED:
+    if config.OutputEnabled:
         ended_at = time()
         with open(os.path.join(OUTPUT_DIR, "output_detail.json"), "w") as f:
             json.dump(
                 {
                     "device": device.type,
-                    "model": MODEL_NAME,
-                    "video_path": VIDEO_PATH,
+                    "model": config.ModelName,
+                    "video_path": config.InputPath,
                     "time_elapsed": ended_at - started_at,
                     "max_person_count": max(person_id_set),
                 },

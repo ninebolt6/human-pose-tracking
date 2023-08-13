@@ -4,6 +4,7 @@ from itertools import chain
 import json
 import os
 from typing import cast
+from config import get_convert_config
 
 from natsort import natsorted
 from tqdm import tqdm
@@ -11,14 +12,14 @@ from calc import length
 from dataclass import Person
 from keypoint import KeypointEnum
 
-from track import OUTPUT_FOLDER
 from usecase import Midpoint, get_body_orientation, warp_keypoints
 from util import as_person, sliding_window
 
 
-TARGET_FOLDER = "20230724_234531"
-CSV_OUTPUT_FOLDER = os.path.join(OUTPUT_FOLDER, TARGET_FOLDER)
-KEYPOINT_JSON_PATH = os.path.join(OUTPUT_FOLDER, TARGET_FOLDER, "keypoints")
+config = get_convert_config()
+
+CSV_OUTPUT_FOLDER = os.path.join(config.OutputPath, config.InputPath)
+KEYPOINT_JSON_PATH = os.path.join(config.OutputPath, config.InputPath, "keypoints")
 EXEC_TIME = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
 

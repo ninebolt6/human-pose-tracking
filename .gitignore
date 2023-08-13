@@ -18,6 +18,7 @@ dataspace/
 
 # outputs
 out/
+out_prod/
 
 # ultralytics files
 *.pt
