@@ -1,10 +1,6 @@
 import cv2
 
-from calc import (
-    angle,
-    to_degree,
-    trans_mat,
-)
+from calc import angle, to_degree, trans_mat
 from constant import DESTINATION_SIZE
 from dataclass import Person
 from keypoint import KeypointEnum

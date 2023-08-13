@@ -1,14 +1,15 @@
-import cv2
-from datetime import datetime
-import torch
-from ultralytics import YOLO
 import json
 import os
+from datetime import datetime
 from time import time
+
+import cv2
+import torch
 from tqdm import tqdm
+from ultralytics import YOLO
 
 from config import get_track_config
-from dataclass import Box, Person, Keypoint
+from dataclass import Box, Keypoint, Person
 from draw import draw_person, warp_perspective
 from keypoint import KeypointEnum
 from util import PersonJSONEncoder, parse_result

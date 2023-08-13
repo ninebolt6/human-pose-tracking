@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 import numpy as np
 
 from keypoint import KeypointEnum

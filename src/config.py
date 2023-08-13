@@ -1,6 +1,5 @@
 import configparser
 from dataclasses import dataclass
-from typing import TypedDict
 
 config = configparser.ConfigParser()
 config.read("config/config.ini")

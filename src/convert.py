@@ -1,20 +1,19 @@
 import csv
-from datetime import datetime
-from itertools import chain
 import json
 import os
+from datetime import datetime
+from itertools import chain
 from typing import cast
-from config import get_convert_config
 
 from natsort import natsorted
 from tqdm import tqdm
+
 from calc import length
+from config import get_convert_config
 from dataclass import Person
 from keypoint import KeypointEnum
-
 from usecase import Midpoint, get_body_orientation, warp_keypoints
 from util import as_person, sliding_window
-
 
 config = get_convert_config()
 
