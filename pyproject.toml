@@ -10,6 +10,7 @@ dependencies = [
     "tqdm~=4.65.0",
     "natsort~=8.4.0",
     "lapx>=0.5.4",
+    "setuptools>=68.1.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
