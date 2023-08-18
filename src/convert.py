@@ -36,6 +36,7 @@ def get_distance_degree_header(id: int) -> list[str]:
 
 def convert():
     if not os.path.isdir(KEYPOINT_JSON_PATH):
+        print(f"Error: {KEYPOINT_JSON_PATH} is not directory.")
         exit(1)
 
     files = os.listdir(KEYPOINT_JSON_PATH)
@@ -153,3 +154,4 @@ def convert():
 
 if __name__ == "__main__":
     convert()
+    print("Done.")
