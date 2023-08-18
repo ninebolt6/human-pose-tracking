@@ -25,10 +25,10 @@ def warp(source: np.ndarray) -> np.ndarray:
     x = A[0] / A[2]
     y = A[1] / A[2]
 
-    if x < 0 or x > 1000:
+    if x < 0 or x > DESTINATION_SIZE[0]:
         x = 0
 
-    if y < 0 or y > 563:
+    if y < 0 or y > DESTINATION_SIZE[1]:
         y = 0
 
     if x == 0 or y == 0:
