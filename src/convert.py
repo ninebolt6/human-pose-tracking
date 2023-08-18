@@ -107,44 +107,55 @@ def convert():
             for person_id in range(1, max_person_count + 1):
                 if current_person_dict.get(person_id) is not None:
                     current_warped_keypoints = warp_keypoints(current_person_dict[person_id].keypoints)
-                    current_middle_hip = Midpoint(
-                        current_warped_keypoints[KeypointEnum.LEFT_HIP],
-                        current_warped_keypoints[KeypointEnum.RIGHT_HIP],
-                    )
 
-                    # 位置座標
-                    current_person_position = current_warped_keypoints[KeypointEnum.LEFT_ANKLE]
-                    if not (current_person_position.xy[0] == 0 and current_person_position.xy[1] == 0):
-                        position_header = get_position_header(person_id)
-                        position_dict[position_header[0]] = current_person_position.xy[0]
-                        position_dict[position_header[1]] = current_person_position.xy[1]
-
-                    if next_person_dict.get(person_id) is not None:
-                        next_warped_keypoints = warp_keypoints(next_person_dict[person_id].keypoints)
-                        next_middle_hip = Midpoint(
-                            next_warped_keypoints[KeypointEnum.LEFT_HIP], next_warped_keypoints[KeypointEnum.RIGHT_HIP]
+                    if (
+                        current_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
+                        and current_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
+                    ):
+                        current_middle_hip = Midpoint(
+                            current_warped_keypoints[KeypointEnum.LEFT_HIP],
+                            current_warped_keypoints[KeypointEnum.RIGHT_HIP],
                         )
 
-                        # 距離・角度
-                        distance = length(current_middle_hip.xy, next_middle_hip.xy)
-                        degree = get_body_orientation(
-                            current_middle_hip, next_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
-                        )
+                        # 位置座標
+                        current_person_position = current_warped_keypoints[KeypointEnum.LEFT_ANKLE]
+                        if current_person_position.xy is not None:
+                            position_header = get_position_header(person_id)
+                            position_dict[position_header[0]] = current_person_position.xy[0]
+                            position_dict[position_header[1]] = current_person_position.xy[1]
 
-                        distance_degree_person_header = get_distance_degree_header(person_id)
-                        distance_degree_dict[distance_degree_person_header[0]] = str(distance)
-                        distance_degree_dict[distance_degree_person_header[1]] = str(degree)
+                        if next_person_dict.get(person_id) is not None:
+                            next_warped_keypoints = warp_keypoints(next_person_dict[person_id].keypoints)
 
-                        # 相対位置座標
-                        next_person_position = next_warped_keypoints[KeypointEnum.LEFT_ANKLE]
-                        if not (next_person_position.xy[0] == 0 and next_person_position.xy[1] == 0):
-                            relative_position_header = get_position_header(person_id)
-                            relative_position_dict[relative_position_header[0]] = (
-                                next_person_position.xy[0] - current_person_position.xy[0]
-                            )
-                            relative_position_dict[relative_position_header[1]] = (
-                                next_person_position.xy[1] - current_person_position.xy[1]
-                            )
+                            if (
+                                next_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
+                                and next_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
+                            ):
+                                next_middle_hip = Midpoint(
+                                    next_warped_keypoints[KeypointEnum.LEFT_HIP],
+                                    next_warped_keypoints[KeypointEnum.RIGHT_HIP],
+                                )
+
+                                # 距離・角度
+                                distance = length(current_middle_hip.xy, next_middle_hip.xy)
+                                degree = get_body_orientation(
+                                    current_middle_hip, next_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
+                                )
+
+                                distance_degree_person_header = get_distance_degree_header(person_id)
+                                distance_degree_dict[distance_degree_person_header[0]] = str(distance)
+                                distance_degree_dict[distance_degree_person_header[1]] = str(degree)
+
+                            # 相対位置座標
+                            next_person_position = next_warped_keypoints[KeypointEnum.LEFT_ANKLE]
+                            if current_person_position.xy is not None and next_person_position.xy is not None:
+                                relative_position_header = get_position_header(person_id)
+                                relative_position_dict[relative_position_header[0]] = (
+                                    next_person_position.xy[0] - current_person_position.xy[0]
+                                )
+                                relative_position_dict[relative_position_header[1]] = (
+                                    next_person_position.xy[1] - current_person_position.xy[1]
+                                )
 
             # 書き込み
             position_writer.writerow(position_dict)

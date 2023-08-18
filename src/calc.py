@@ -20,22 +20,16 @@ def trans_mat() -> np.ndarray:
     return cv2.getPerspectiveTransform(src, dst)
 
 
-def warp(source: np.ndarray) -> np.ndarray:
+def warp(source: np.ndarray) -> np.ndarray | None:
     A = np.dot(trans_mat(), np.concatenate((source, [1]), axis=0))
     x = A[0] / A[2]
     y = A[1] / A[2]
 
     if x < 0 or x > DESTINATION_SIZE[0]:
-        x = 0
+        return None
 
     if y < 0 or y > DESTINATION_SIZE[1]:
-        y = 0
-
-    if x == 0 or y == 0:
-        x = 0
-        y = 0
-        # TODO: Noneにしたい
-        # return None
+        return None
 
     return np.array([x, y], dtype=np.float64)
 

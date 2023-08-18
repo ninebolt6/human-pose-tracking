@@ -9,7 +9,7 @@ from keypoint import KeypointEnum
 
 @dataclass
 class WarpedKeypoint:
-    xy: np.ndarray
+    xy: np.ndarray | None
     confidence: np.ndarray
 
     def __init__(self, keypoint: Keypoint):
@@ -23,6 +23,8 @@ class Midpoint:
     confidence: np.ndarray
 
     def __init__(self, p1: Keypoint | WarpedKeypoint, p2: Keypoint | WarpedKeypoint):
+        assert p1.xy is not None and p2.xy is not None
+
         self.xy = (p1.xy + p2.xy) / 2.0
         self.confidence = p1.confidence * p2.confidence
 
@@ -34,4 +36,6 @@ def warp_keypoints(keypoints: dict[KeypointEnum, Keypoint]) -> dict[KeypointEnum
 def get_body_orientation(
     current_middle_hip: Midpoint, next_middle_hip: Midpoint, current_left_hip: WarpedKeypoint
 ) -> np.float64:
+    assert current_left_hip.xy is not None
+
     return 90.0 - to_degree(angle(current_middle_hip.xy, next_middle_hip.xy, current_left_hip.xy))
