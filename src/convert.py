@@ -12,7 +12,7 @@ from calc import length
 from config import get_convert_config
 from dataclass import Person
 from keypoint import KeypointEnum
-from usecase import Midpoint, WarpedKeypoint, get_body_orientation, warp_keypoints
+from usecase import WarpedKeypoint, get_body_orientation, get_middle_hip, warp_keypoints
 from util import as_person
 
 config = get_convert_config()
@@ -139,18 +139,13 @@ def convert():
                             and current_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
                         ):
                             # 距離・角度
-                            current_middle_hip = Midpoint(
-                                current_warped_keypoints[KeypointEnum.LEFT_HIP],
-                                current_warped_keypoints[KeypointEnum.RIGHT_HIP],
-                            )
-                            before_middle_hip = Midpoint(
-                                before_warped_keypoints[KeypointEnum.LEFT_HIP],
-                                before_warped_keypoints[KeypointEnum.RIGHT_HIP],
-                            )
+                            current_middle_hip = get_middle_hip(current_warped_keypoints)
+                            before_middle_hip = get_middle_hip(before_warped_keypoints)
                             distance = length(before_middle_hip.xy, current_middle_hip.xy)
                             degree = get_body_orientation(
                                 before_middle_hip, current_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
                             )
+
                             append_distance_degree(distance_degree_dict, person_id, distance, degree)
 
                         # 相対位置座標

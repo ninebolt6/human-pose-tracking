@@ -39,3 +39,7 @@ def get_body_orientation(
     assert current_left_hip.xy is not None
 
     return 90.0 - to_degree(angle(current_middle_hip.xy, next_middle_hip.xy, current_left_hip.xy))
+
+
+def get_middle_hip(keypoints: dict[KeypointEnum, WarpedKeypoint]) -> Midpoint:
+    return Midpoint(keypoints[KeypointEnum.LEFT_HIP], keypoints[KeypointEnum.RIGHT_HIP])
