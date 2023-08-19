@@ -27,17 +27,17 @@ def append_relative_position(dict: dict[str, str], person_id: int, relative_posi
 
 class PositionWriter:
     def __init__(self, file: TextIOWrapper, max_person_count: int):
-        position_header = ["frame_num"]
-        position_header.extend(
+        header = ["frame_num"]
+        header.extend(
             # flatten
-            chain.from_iterable(map(lambda id: self.generate_person_header(id), range(1, max_person_count + 1)))
+            chain.from_iterable(map(lambda id: self.generate_header(id), range(1, max_person_count + 1)))
         )
 
-        self.writer = csv.DictWriter(file, fieldnames=position_header)
+        self.writer = csv.DictWriter(file, fieldnames=header)
         self.writer.writeheader()
         self.buf = {}
 
-    def generate_person_header(self, id: int) -> list[str]:
+    def generate_header(self, id: int) -> list[str]:
         return [f"id:{id} x", f"id:{id} y"]
 
     def append_frame_num(self, frame_num: str):
@@ -46,9 +46,9 @@ class PositionWriter:
     def append(self, person_id: int, position: WarpedKeypoint):
         assert position.xy is not None
 
-        position_header = self.generate_person_header(person_id)
-        self.buf[position_header[0]] = position.xy[0]
-        self.buf[position_header[1]] = position.xy[1]
+        target_header = self.generate_header(person_id)
+        self.buf[target_header[0]] = position.xy[0]
+        self.buf[target_header[1]] = position.xy[1]
 
     def writerow(self):
         self.writer.writerow(self.buf)
