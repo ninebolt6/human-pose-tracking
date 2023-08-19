@@ -20,9 +20,6 @@ class PositionWriter:
     def generate_header(self, id: int) -> list[str]:
         return [f"id:{id} x", f"id:{id} y"]
 
-    def append_frame_num(self, frame_num: str):
-        self.buf["frame_num"] = frame_num
-
     def append(self, person_id: int, position: WarpedKeypoint):
         assert position.xy is not None
 
@@ -30,7 +27,8 @@ class PositionWriter:
         self.buf[target_header[0]] = position.xy[0]
         self.buf[target_header[1]] = position.xy[1]
 
-    def writerow(self):
+    def writerow(self, frame_num: str):
+        self.buf["frame_num"] = frame_num
         self.writer.writerow(self.buf)
         self.buf = {}
 
@@ -50,15 +48,13 @@ class DistanceDegreeWriter:
     def generate_header(self, id: int) -> list[str]:
         return [f"id:{id} dist", f"id:{id} deg"]
 
-    def append_frame_num(self, frame_num: str):
-        self.buf["frame_num"] = frame_num
-
     def append(self, person_id: int, distance: float64, degree: float64):
         target_header = self.generate_header(person_id)
         self.buf[target_header[0]] = distance
         self.buf[target_header[1]] = degree
 
-    def writerow(self):
+    def writerow(self, frame_num: str):
+        self.buf["frame_num"] = frame_num
         self.writer.writerow(self.buf)
         self.buf = {}
 
@@ -78,14 +74,12 @@ class RelativePositionWriter:
     def generate_header(self, id: int) -> list[str]:
         return [f"id:{id} x", f"id:{id} y"]
 
-    def append_frame_num(self, frame_num: str):
-        self.buf["frame_num"] = frame_num
-
     def append(self, person_id: int, relative_position: ndarray):
         target_header = self.generate_header(person_id)
         self.buf[target_header[0]] = relative_position[0]
         self.buf[target_header[1]] = relative_position[1]
 
-    def writerow(self):
+    def writerow(self, frame_num: str):
+        self.buf["frame_num"] = frame_num
         self.writer.writerow(self.buf)
         self.buf = {}

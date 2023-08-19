@@ -63,12 +63,7 @@ def convert():
             with open(os.path.join(KEYPOINT_JSON_PATH, filename)) as current_file:
                 current_list: list[Person] = json.load(current_file, object_hook=as_person)
                 current_person_dict = {person.person_id: person for person in current_list}
-
-            # 準備
-            current_frame_num = get_frame_num(filename)
-            position_writer.append_frame_num(current_frame_num)
-            distance_degree_writer.append_frame_num(current_frame_num)
-            relative_position_writer.append_frame_num(current_frame_num)
+                current_frame_num = get_frame_num(filename)
 
             for person_id in range(1, max_person_count + 1):
                 if current_person_dict.get(person_id) is not None:
@@ -119,9 +114,9 @@ def convert():
                     position_cache[person_id][int(current_frame_num)] = current_person_dict[person_id]
 
             # 1行の書き込み
-            position_writer.writerow()
-            distance_degree_writer.writerow()
-            relative_position_writer.writerow()
+            position_writer.writerow(current_frame_num)
+            distance_degree_writer.writerow(current_frame_num)
+            relative_position_writer.writerow(current_frame_num)
 
 
 if __name__ == "__main__":
