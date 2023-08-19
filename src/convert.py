@@ -10,11 +10,11 @@ from tqdm import tqdm
 from calc import length
 from config import get_convert_config
 from csv_writer import (
+    PositionWriter,
     append_distance_degree,
-    append_position,
     append_relative_position,
     get_distance_degree_header,
-    get_position_header,
+    get_relative_position_header,
 )
 from dataclass import Person
 from keypoint import KeypointEnum
@@ -53,13 +53,7 @@ def convert():
         os.path.join(CSV_OUTPUT_FOLDER, f"out_relative_position_{EXEC_TIME}.csv"), "w", encoding="utf-8", newline=""
     ) as relative_position_out:
         # 位置座標
-        position_header = ["frame_num"]
-        position_header.extend(
-            # flatten
-            chain.from_iterable(map(lambda id: get_position_header(id), range(1, max_person_count + 1)))
-        )
-        position_writer = csv.DictWriter(position_out, fieldnames=position_header)
-        position_writer.writeheader()
+        position_writer = PositionWriter(position_out, max_person_count)
 
         # 距離・角度
         distance_degree_header = ["frame_num"]
@@ -74,7 +68,7 @@ def convert():
         relative_position_header = ["frame_num"]
         relative_position_header.extend(
             # flatten
-            chain.from_iterable(map(lambda id: get_position_header(id), range(1, max_person_count + 1)))
+            chain.from_iterable(map(lambda id: get_relative_position_header(id), range(1, max_person_count + 1)))
         )
         relative_position_writer = csv.DictWriter(relative_position_out, fieldnames=relative_position_header)
         relative_position_writer.writeheader()
@@ -89,7 +83,7 @@ def convert():
 
             # 準備
             current_frame_num = get_frame_num(filename)
-            position_dict = {"frame_num": current_frame_num}
+            position_writer.append_frame_num(current_frame_num)
             distance_degree_dict = {"frame_num": current_frame_num}
             relative_position_dict = {"frame_num": current_frame_num}
 
@@ -100,7 +94,7 @@ def convert():
                     # 位置座標
                     current_person_position = current_warped_keypoints[KeypointEnum.LEFT_ANKLE]
                     if current_person_position.xy is not None:
-                        append_position(position_dict, person_id, current_person_position)
+                        position_writer.append(person_id, current_person_position)
 
                     if (
                         position_cache.get(person_id) is not None
@@ -141,8 +135,8 @@ def convert():
 
                     position_cache[person_id][int(current_frame_num)] = current_person_dict[person_id]
 
-            # 書き込み
-            position_writer.writerow(position_dict)
+            # 1行の書き込み
+            position_writer.writerow()
             distance_degree_writer.writerow(distance_degree_dict)
             relative_position_writer.writerow(relative_position_dict)
 
