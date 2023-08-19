@@ -21,6 +21,7 @@ class TrackConfig(CommonConfig):
 @dataclass(frozen=True)
 class ConvertConfig(CommonConfig):
     InputPath: str
+    CalcInterval: int
 
 
 def get_track_config() -> TrackConfig:
@@ -37,4 +38,5 @@ def get_convert_config():
     return ConvertConfig(
         OutputPath=config["common"]["OutputPath"],
         InputPath=config["convert"]["InputPath"],
+        CalcInterval=config["convert"].getint("CalcInterval"),
     )
