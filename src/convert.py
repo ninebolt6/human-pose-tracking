@@ -3,7 +3,6 @@ import json
 import os
 from datetime import datetime
 from itertools import chain
-from typing import cast
 
 from natsort import natsorted
 from numpy import float64, ndarray
@@ -14,7 +13,7 @@ from config import get_convert_config
 from dataclass import Person
 from keypoint import KeypointEnum
 from usecase import Midpoint, WarpedKeypoint, get_body_orientation, warp_keypoints
-from util import as_person, sliding_window
+from util import as_person
 
 config = get_convert_config()
 
@@ -92,8 +91,6 @@ def convert():
         )
         distance_degree_writer = csv.DictWriter(distance_degree_out, fieldnames=distance_degree_header)
         distance_degree_writer.writeheader()
-        # 前のフレームがないので空行を書き込む
-        distance_degree_writer.writerow({"frame_num": get_frame_num("1")})
 
         # 相対位置座標
         relative_position_header = ["frame_num"]
@@ -103,27 +100,20 @@ def convert():
         )
         relative_position_writer = csv.DictWriter(relative_position_out, fieldnames=relative_position_header)
         relative_position_writer.writeheader()
-        # 前のフレームがないので空行を書き込む
-        relative_position_writer.writerow({"frame_num": get_frame_num("1")})
 
-        for window in tqdm(sliding_window(files, 2), unit="frame", total=len(files) - 1):
-            (filename, next_filename) = cast(tuple[str, str], window)
+        # key: person_id, value: (key: frame_num, value: person)
+        position_cache: dict[int, dict[int, Person]] = {}
 
-            with open(os.path.join(KEYPOINT_JSON_PATH, filename)) as current_file, open(
-                os.path.join(KEYPOINT_JSON_PATH, next_filename)
-            ) as next_file:
+        for filename in tqdm(files, unit="frame", total=len(files) - 1):
+            with open(os.path.join(KEYPOINT_JSON_PATH, filename)) as current_file:
                 current_list: list[Person] = json.load(current_file, object_hook=as_person)
                 current_person_dict = {person.person_id: person for person in current_list}
 
-                next_list: list[Person] = json.load(next_file, object_hook=as_person)
-                next_person_dict = {person.person_id: person for person in next_list}
-
             # 準備
             current_frame_num = get_frame_num(filename)
-            next_frame_num = get_frame_num(next_filename)
             position_dict = {"frame_num": current_frame_num}
-            distance_degree_dict = {"frame_num": next_frame_num}
-            relative_position_dict = {"frame_num": next_frame_num}
+            distance_degree_dict = {"frame_num": current_frame_num}
+            relative_position_dict = {"frame_num": current_frame_num}
 
             for person_id in range(1, max_person_count + 1):
                 if current_person_dict.get(person_id) is not None:
@@ -134,35 +124,49 @@ def convert():
                     if current_person_position.xy is not None:
                         append_position(position_dict, person_id, current_person_position)
 
-                    if next_person_dict.get(person_id) is not None:
-                        next_warped_keypoints = warp_keypoints(next_person_dict[person_id].keypoints)
+                    if (
+                        position_cache.get(person_id) is not None
+                        and position_cache[person_id].get(int(current_frame_num) - config.CalcInterval) is not None
+                    ):
+                        before_person = position_cache[person_id][int(current_frame_num) - config.CalcInterval]
+                        before_warped_keypoints = warp_keypoints(before_person.keypoints)
 
+                        # 処理する
                         if (
-                            current_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
+                            before_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
+                            and before_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
+                            and current_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
                             and current_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
-                            and next_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
-                            and next_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
                         ):
                             # 距離・角度
-                            next_middle_hip = Midpoint(
-                                next_warped_keypoints[KeypointEnum.LEFT_HIP],
-                                next_warped_keypoints[KeypointEnum.RIGHT_HIP],
-                            )
                             current_middle_hip = Midpoint(
                                 current_warped_keypoints[KeypointEnum.LEFT_HIP],
                                 current_warped_keypoints[KeypointEnum.RIGHT_HIP],
                             )
-                            distance = length(current_middle_hip.xy, next_middle_hip.xy)
+                            before_middle_hip = Midpoint(
+                                before_warped_keypoints[KeypointEnum.LEFT_HIP],
+                                before_warped_keypoints[KeypointEnum.RIGHT_HIP],
+                            )
+                            distance = length(before_middle_hip.xy, current_middle_hip.xy)
                             degree = get_body_orientation(
-                                current_middle_hip, next_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
+                                before_middle_hip, current_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
                             )
                             append_distance_degree(distance_degree_dict, person_id, distance, degree)
 
                         # 相対位置座標
-                        next_person_position = next_warped_keypoints[KeypointEnum.LEFT_ANKLE]
-                        if current_person_position.xy is not None and next_person_position.xy is not None:
-                            relative_position = next_person_position.xy - current_person_position.xy
+                        before_person_position = before_warped_keypoints[KeypointEnum.LEFT_ANKLE]
+                        if before_person_position.xy is not None and current_person_position.xy is not None:
+                            relative_position = current_person_position.xy - before_person_position.xy
                             append_relative_position(relative_position_dict, person_id, relative_position)
+
+                        # 書き込めたらキャッシュを削除する
+                        del position_cache[person_id]
+
+                    # キャッシュに保存
+                    if position_cache.get(person_id) is None:
+                        position_cache[person_id] = {}
+
+                    position_cache[person_id][int(current_frame_num)] = current_person_dict[person_id]
 
             # 書き込み
             position_writer.writerow(position_dict)
