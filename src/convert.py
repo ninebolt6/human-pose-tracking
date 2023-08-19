@@ -1,8 +1,6 @@
-import csv
 import json
 import os
 from datetime import datetime
-from itertools import chain
 
 from natsort import natsorted
 from tqdm import tqdm
@@ -12,8 +10,7 @@ from config import get_convert_config
 from csv_writer import (
     PositionWriter,
     DistanceDegreeWriter,
-    append_relative_position,
-    get_relative_position_header,
+    RelativePositionWriter,
 )
 from dataclass import Person
 from keypoint import KeypointEnum
@@ -57,13 +54,7 @@ def convert():
         # 距離・角度
         distance_degree_writer = DistanceDegreeWriter(distance_degree_out, max_person_count)
         # 相対位置座標
-        relative_position_header = ["frame_num"]
-        relative_position_header.extend(
-            # flatten
-            chain.from_iterable(map(lambda id: get_relative_position_header(id), range(1, max_person_count + 1)))
-        )
-        relative_position_writer = csv.DictWriter(relative_position_out, fieldnames=relative_position_header)
-        relative_position_writer.writeheader()
+        relative_position_writer = RelativePositionWriter(relative_position_out, max_person_count)
 
         # key: person_id, value: (key: frame_num, value: person)
         position_cache: dict[int, dict[int, Person]] = {}
@@ -77,7 +68,7 @@ def convert():
             current_frame_num = get_frame_num(filename)
             position_writer.append_frame_num(current_frame_num)
             distance_degree_writer.append_frame_num(current_frame_num)
-            relative_position_dict = {"frame_num": current_frame_num}
+            relative_position_writer.append_frame_num(current_frame_num)
 
             for person_id in range(1, max_person_count + 1):
                 if current_person_dict.get(person_id) is not None:
@@ -116,7 +107,7 @@ def convert():
                         before_person_position = before_warped_keypoints[KeypointEnum.LEFT_ANKLE]
                         if before_person_position.xy is not None and current_person_position.xy is not None:
                             relative_position = current_person_position.xy - before_person_position.xy
-                            append_relative_position(relative_position_dict, person_id, relative_position)
+                            relative_position_writer.append(person_id, relative_position)
 
                         # 書き込めたらキャッシュを削除する
                         del position_cache[person_id]
@@ -130,7 +121,7 @@ def convert():
             # 1行の書き込み
             position_writer.writerow()
             distance_degree_writer.writerow()
-            relative_position_writer.writerow(relative_position_dict)
+            relative_position_writer.writerow()
 
 
 if __name__ == "__main__":
