@@ -11,9 +11,8 @@ from calc import length
 from config import get_convert_config
 from csv_writer import (
     PositionWriter,
-    append_distance_degree,
+    DistanceDegreeWriter,
     append_relative_position,
-    get_distance_degree_header,
     get_relative_position_header,
 )
 from dataclass import Person
@@ -56,14 +55,7 @@ def convert():
         position_writer = PositionWriter(position_out, max_person_count)
 
         # 距離・角度
-        distance_degree_header = ["frame_num"]
-        distance_degree_header.extend(
-            # flatten
-            chain.from_iterable(map(lambda id: get_distance_degree_header(id), range(1, max_person_count + 1)))
-        )
-        distance_degree_writer = csv.DictWriter(distance_degree_out, fieldnames=distance_degree_header)
-        distance_degree_writer.writeheader()
-
+        distance_degree_writer = DistanceDegreeWriter(distance_degree_out, max_person_count)
         # 相対位置座標
         relative_position_header = ["frame_num"]
         relative_position_header.extend(
@@ -84,7 +76,7 @@ def convert():
             # 準備
             current_frame_num = get_frame_num(filename)
             position_writer.append_frame_num(current_frame_num)
-            distance_degree_dict = {"frame_num": current_frame_num}
+            distance_degree_writer.append_frame_num(current_frame_num)
             relative_position_dict = {"frame_num": current_frame_num}
 
             for person_id in range(1, max_person_count + 1):
@@ -118,7 +110,7 @@ def convert():
                                 before_middle_hip, current_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
                             )
 
-                            append_distance_degree(distance_degree_dict, person_id, distance, degree)
+                            distance_degree_writer.append(person_id, distance, degree)
 
                         # 相対位置座標
                         before_person_position = before_warped_keypoints[KeypointEnum.LEFT_ANKLE]
@@ -137,7 +129,7 @@ def convert():
 
             # 1行の書き込み
             position_writer.writerow()
-            distance_degree_writer.writerow(distance_degree_dict)
+            distance_degree_writer.writerow()
             relative_position_writer.writerow(relative_position_dict)
 
 
