@@ -17,8 +17,9 @@ from keypoint import KeypointEnum
 from usecase import get_body_orientation, get_middle_hip, warp_keypoints
 from util import as_person
 
-config = get_convert_config()
 
+# 設定の読み込み
+config = get_convert_config()
 CSV_OUTPUT_FOLDER = os.path.join(config.OutputPath, config.InputPath)
 KEYPOINT_JSON_PATH = os.path.join(config.OutputPath, config.InputPath, "keypoints")
 EXEC_TIME = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -37,10 +38,12 @@ def convert():
     files = list(filter(lambda f: f.endswith(".json"), files))
     files = natsorted(files)
 
+    # 人数の最大値を取得
     with open(os.path.join(CSV_OUTPUT_FOLDER, "output_detail.json"), "r", encoding="utf-8") as detail:
         output_detail = json.load(detail)
         max_person_count = output_detail["max_person_count"]
 
+    # 書き込み用ファイルの準備
     with open(
         os.path.join(CSV_OUTPUT_FOLDER, f"out_position_{EXEC_TIME}.csv"), "w", encoding="utf-8", newline=""
     ) as position_out, open(
@@ -48,18 +51,15 @@ def convert():
     ) as distance_degree_out, open(
         os.path.join(CSV_OUTPUT_FOLDER, f"out_relative_position_{EXEC_TIME}.csv"), "w", encoding="utf-8", newline=""
     ) as relative_position_out:
-        # 位置座標
+        # Writerの準備
         position_writer = PositionWriter(position_out, max_person_count)
-
-        # 距離・角度
         distance_degree_writer = DistanceDegreeWriter(distance_degree_out, max_person_count)
-        # 相対位置座標
         relative_position_writer = RelativePositionWriter(relative_position_out, max_person_count)
-
         # key: person_id, value: (key: frame_num, value: person)
         position_cache: dict[int, dict[int, Person]] = {}
 
         for filename in tqdm(files, unit="frame", total=len(files) - 1):
+            # フレームファイルの読み込み
             with open(os.path.join(KEYPOINT_JSON_PATH, filename)) as current_file:
                 current_list: list[Person] = json.load(current_file, object_hook=as_person)
                 current_person_dict = {person.person_id: person for person in current_list}
@@ -81,7 +81,6 @@ def convert():
                         before_person = position_cache[person_id][int(current_frame_num) - config.CalcInterval]
                         before_warped_keypoints = warp_keypoints(before_person.keypoints)
 
-                        # 処理する
                         if (
                             before_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
                             and before_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
