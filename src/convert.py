@@ -6,13 +6,14 @@ from itertools import chain
 from typing import cast
 
 from natsort import natsorted
+from numpy import float64, ndarray
 from tqdm import tqdm
 
 from calc import length
 from config import get_convert_config
 from dataclass import Person
 from keypoint import KeypointEnum
-from usecase import Midpoint, get_body_orientation, warp_keypoints
+from usecase import Midpoint, WarpedKeypoint, get_body_orientation, warp_keypoints
 from util import as_person, sliding_window
 
 config = get_convert_config()
@@ -32,6 +33,26 @@ def get_position_header(id: int) -> list[str]:
 
 def get_distance_degree_header(id: int) -> list[str]:
     return [f"id:{id} dist", f"id:{id} deg"]
+
+
+def append_position(dict: dict[str, str], person_id: int, position: WarpedKeypoint):
+    assert position.xy is not None
+
+    position_header = get_position_header(person_id)
+    dict[position_header[0]] = position.xy[0]
+    dict[position_header[1]] = position.xy[1]
+
+
+def append_distance_degree(dict: dict[str, str], person_id: int, distance: float64, degree: float64):
+    distance_degree_header = get_distance_degree_header(person_id)
+    dict[distance_degree_header[0]] = str(distance)
+    dict[distance_degree_header[1]] = str(degree)
+
+
+def append_relative_position(dict: dict[str, str], person_id: int, relative_position: ndarray):
+    position_header = get_position_header(person_id)
+    dict[position_header[0]] = relative_position[0]
+    dict[position_header[1]] = relative_position[1]
 
 
 def convert():
@@ -108,54 +129,40 @@ def convert():
                 if current_person_dict.get(person_id) is not None:
                     current_warped_keypoints = warp_keypoints(current_person_dict[person_id].keypoints)
 
-                    if (
-                        current_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
-                        and current_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
-                    ):
-                        current_middle_hip = Midpoint(
-                            current_warped_keypoints[KeypointEnum.LEFT_HIP],
-                            current_warped_keypoints[KeypointEnum.RIGHT_HIP],
-                        )
+                    # 位置座標
+                    current_person_position = current_warped_keypoints[KeypointEnum.LEFT_ANKLE]
+                    if current_person_position.xy is not None:
+                        append_position(position_dict, person_id, current_person_position)
 
-                        # 位置座標
-                        current_person_position = current_warped_keypoints[KeypointEnum.LEFT_ANKLE]
-                        if current_person_position.xy is not None:
-                            position_header = get_position_header(person_id)
-                            position_dict[position_header[0]] = current_person_position.xy[0]
-                            position_dict[position_header[1]] = current_person_position.xy[1]
+                    if next_person_dict.get(person_id) is not None:
+                        next_warped_keypoints = warp_keypoints(next_person_dict[person_id].keypoints)
 
-                        if next_person_dict.get(person_id) is not None:
-                            next_warped_keypoints = warp_keypoints(next_person_dict[person_id].keypoints)
+                        if (
+                            current_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
+                            and current_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
+                            and next_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
+                            and next_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
+                        ):
+                            # 距離・角度
+                            next_middle_hip = Midpoint(
+                                next_warped_keypoints[KeypointEnum.LEFT_HIP],
+                                next_warped_keypoints[KeypointEnum.RIGHT_HIP],
+                            )
+                            current_middle_hip = Midpoint(
+                                current_warped_keypoints[KeypointEnum.LEFT_HIP],
+                                current_warped_keypoints[KeypointEnum.RIGHT_HIP],
+                            )
+                            distance = length(current_middle_hip.xy, next_middle_hip.xy)
+                            degree = get_body_orientation(
+                                current_middle_hip, next_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
+                            )
+                            append_distance_degree(distance_degree_dict, person_id, distance, degree)
 
-                            if (
-                                next_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
-                                and next_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
-                            ):
-                                next_middle_hip = Midpoint(
-                                    next_warped_keypoints[KeypointEnum.LEFT_HIP],
-                                    next_warped_keypoints[KeypointEnum.RIGHT_HIP],
-                                )
-
-                                # 距離・角度
-                                distance = length(current_middle_hip.xy, next_middle_hip.xy)
-                                degree = get_body_orientation(
-                                    current_middle_hip, next_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
-                                )
-
-                                distance_degree_person_header = get_distance_degree_header(person_id)
-                                distance_degree_dict[distance_degree_person_header[0]] = str(distance)
-                                distance_degree_dict[distance_degree_person_header[1]] = str(degree)
-
-                            # 相対位置座標
-                            next_person_position = next_warped_keypoints[KeypointEnum.LEFT_ANKLE]
-                            if current_person_position.xy is not None and next_person_position.xy is not None:
-                                relative_position_header = get_position_header(person_id)
-                                relative_position_dict[relative_position_header[0]] = (
-                                    next_person_position.xy[0] - current_person_position.xy[0]
-                                )
-                                relative_position_dict[relative_position_header[1]] = (
-                                    next_person_position.xy[1] - current_person_position.xy[1]
-                                )
+                        # 相対位置座標
+                        next_person_position = next_warped_keypoints[KeypointEnum.LEFT_ANKLE]
+                        if current_person_position.xy is not None and next_person_position.xy is not None:
+                            relative_position = next_person_position.xy - current_person_position.xy
+                            append_relative_position(relative_position_dict, person_id, relative_position)
 
             # 書き込み
             position_writer.writerow(position_dict)
