@@ -1,14 +1,13 @@
 import cv2
 
 from calc import angle, to_degree, trans_mat
-from constant import DESTINATION_SIZE
 from dataclass import Person
 from keypoint import KeypointEnum
 from usecase import Midpoint, warp_keypoints
 
 
-def warp_perspective(img):
-    return cv2.warpPerspective(img, trans_mat(), DESTINATION_SIZE)
+def warp_perspective(img, source, destination_size):
+    return cv2.warpPerspective(img, trans_mat(source, destination_size), destination_size)
 
 
 def draw_person(person_data: Person, before_person_data: Person | None, output):

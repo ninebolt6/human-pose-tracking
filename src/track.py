@@ -99,7 +99,7 @@ def track():
 
         if config.ShowPreview:
             # 射影変換・透視変換する
-            output = warp_perspective(result.orig_img)
+            output = warp_perspective(result.orig_img, config.SourcePoints, config.DestinationSize)
 
             for person in data:
                 before_person = next(filter(lambda p: p.person_id == person.person_id, before_data), None)

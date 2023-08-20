@@ -1,35 +1,27 @@
 import cv2
 import numpy as np
 
-from constant import DESTINATION_SIZE, SRC
 
-
-def trans_mat() -> np.ndarray:
+def trans_mat(source, destination_size) -> np.ndarray:
     # 変換前4点　左上　右上 左下 右下
-    src = np.array(SRC, dtype=np.float32)
+    src = np.array(source, dtype=np.float32)
     # 変換後の4点　左上　右上 左下 右下
     dst = np.array(
         [
             [0, 0],
-            [DESTINATION_SIZE[0], 0],
-            [0, DESTINATION_SIZE[1]],
-            DESTINATION_SIZE,
+            [destination_size[0], 0],
+            [0, destination_size[1]],
+            destination_size,
         ],
         dtype=np.float32,
     )
     return cv2.getPerspectiveTransform(src, dst)
 
 
-def warp(source: np.ndarray) -> np.ndarray | None:
-    A = np.dot(trans_mat(), np.concatenate((source, [1]), axis=0))
+def warp(point: np.ndarray, trans_mat) -> np.ndarray:
+    A = np.dot(trans_mat, np.concatenate((point, [1]), axis=0))
     x = A[0] / A[2]
     y = A[1] / A[2]
-
-    if x < 0 or x > DESTINATION_SIZE[0]:
-        return None
-
-    if y < 0 or y > DESTINATION_SIZE[1]:
-        return None
 
     return np.array([x, y], dtype=np.float64)
 
