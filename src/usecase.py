@@ -39,11 +39,11 @@ def warp_keypoints(keypoints: dict[KeypointEnum, Keypoint]) -> dict[KeypointEnum
 
 
 def get_body_orientation(
-    current_middle_hip: Midpoint, next_middle_hip: Midpoint, current_left_hip: WarpedKeypoint
+    before_middle_hip: Midpoint, current_middle_hip: Midpoint, before_left_hip: Keypoint | WarpedKeypoint
 ) -> np.float64:
-    assert current_left_hip.xy is not None
+    assert before_left_hip.xy is not None
 
-    return 90.0 - to_degree(angle(current_middle_hip.xy, next_middle_hip.xy, current_left_hip.xy))
+    return 90 - to_degree(angle(before_middle_hip.xy, current_middle_hip.xy, before_left_hip.xy))
 
 
 def get_middle_hip(keypoints: dict[KeypointEnum, WarpedKeypoint]) -> Midpoint:

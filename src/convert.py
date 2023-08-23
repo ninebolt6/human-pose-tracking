@@ -98,13 +98,14 @@ def convert():
                             relative_position_writer.append(person_id, relative_position)
 
                         if is_both_hip_exist(current_warped_keypoints) and is_both_hip_exist(before_warped_keypoints):
-                            # 角度
                             current_middle_hip = get_middle_hip(current_warped_keypoints)
                             before_middle_hip = get_middle_hip(before_warped_keypoints)
-                            degree = get_body_orientation(
-                                before_middle_hip, current_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
-                            )
-                            distance_degree_writer.append_degree(person_id, degree)
+                            before_left_hip = before_warped_keypoints[KeypointEnum.LEFT_HIP]
+
+                            if before_left_hip.xy is not None:
+                                # 角度
+                                degree = get_body_orientation(before_middle_hip, current_middle_hip, before_left_hip)
+                                distance_degree_writer.append_degree(person_id, degree)
 
                         # 書き込めたらキャッシュを削除する
                         del position_cache[person_id]
