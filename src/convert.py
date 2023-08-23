@@ -29,6 +29,14 @@ def get_frame_num(filename: str) -> str:
     return filename.replace("frame_", "").replace(".json", "")
 
 
+def is_calc_target_exist(
+    position_cache: dict[int, dict[int, Person]], person_id: int, calc_target_frame_num: int
+) -> bool:
+    return (
+        position_cache.get(person_id) is not None and position_cache[person_id].get(calc_target_frame_num) is not None
+    )
+
+
 def convert():
     if not os.path.isdir(KEYPOINT_JSON_PATH):
         print(f"Error: {KEYPOINT_JSON_PATH} is not directory.")
@@ -75,10 +83,7 @@ def convert():
                     if current_person_position.xy is not None:
                         position_writer.append(person_id, current_person_position)
 
-                    if (
-                        position_cache.get(person_id) is not None
-                        and position_cache[person_id].get(calc_target_frame_num) is not None
-                    ):
+                    if is_calc_target_exist(position_cache, person_id, calc_target_frame_num):
                         before_person = position_cache[person_id][calc_target_frame_num]
                         before_warped_keypoints = warp_keypoints(before_person.keypoints)
                         before_person_position = before_warped_keypoints[KeypointEnum.LEFT_ANKLE]
