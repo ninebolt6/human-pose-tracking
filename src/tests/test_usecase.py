@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from dataclass import Keypoint
 from usecase import Midpoint, get_body_orientation
 
@@ -20,33 +21,29 @@ def create_polar_coordinate(deg: int) -> np.ndarray:
     )
 
 
-class TestGetBodyOrientation:
-    def test_straight(self):
-        current_middle_hip = create_midpoint(np.array([0, 0]))
-        next_middle_hip = create_midpoint(create_polar_coordinate(90))
+params = [
+    # 正面ならば0度
+    (90, 0.0),
+    # 左前ならば30度
+    (120, 30.0),
+    # 左ならば90度
+    (180, 90.0),
+    # 左後ろならば135度
+    (225, 135.0),
+    # 後ろならば180度
+    (270, 180.0),
+    # 右後ろならば210度
+    (300, 210.0),
+    # 右ならば270度
+    (360, 270.0),
+    # 右前ならば315度
+    (45, 315.0),
+]
 
-        assert np.allclose(get_body_orientation(current_middle_hip, next_middle_hip), 0.0)
 
-    def test_left_forward(self):
-        current_middle_hip = create_midpoint(np.array([0, 0]))
-        next_middle_hip = create_midpoint(create_polar_coordinate(120))
+@pytest.mark.parametrize("degree, expected", params)
+def test_get_body_orientation(degree, expected):
+    before_middle_hip = create_midpoint(np.array([0, 0]))
+    current_middle_hip = create_midpoint(create_polar_coordinate(degree))
 
-        assert np.allclose(get_body_orientation(current_middle_hip, next_middle_hip), 30.0)
-
-    def test_left_backward(self):
-        current_middle_hip = create_midpoint(np.array([0, 0]))
-        next_middle_hip = create_midpoint(create_polar_coordinate(225))
-
-        assert np.allclose(get_body_orientation(current_middle_hip, next_middle_hip), 135.0)
-
-    def test_right_backward(self):
-        current_middle_hip = create_midpoint(np.array([0, 0]))
-        next_middle_hip = create_midpoint(create_polar_coordinate(300))
-
-        assert np.allclose(get_body_orientation(current_middle_hip, next_middle_hip), 210.0)
-
-    def test_right_forward(self):
-        current_middle_hip = create_midpoint(np.array([0, 0]))
-        next_middle_hip = create_midpoint(create_polar_coordinate(45))
-
-        assert np.allclose(get_body_orientation(current_middle_hip, next_middle_hip), 315.0)
+    assert np.allclose(get_body_orientation(before_middle_hip, current_middle_hip), expected)
