@@ -64,6 +64,7 @@ def convert():
                 current_list: list[Person] = json.load(current_file, object_hook=as_person)
                 current_person_dict = {person.person_id: person for person in current_list}
                 current_frame_num = get_frame_num(filename)
+                calc_target_frame_num = int(current_frame_num) - config.CalcInterval
 
             for person_id in range(1, max_person_count + 1):
                 if current_person_dict.get(person_id) is not None:
@@ -76,9 +77,9 @@ def convert():
 
                     if (
                         position_cache.get(person_id) is not None
-                        and position_cache[person_id].get(int(current_frame_num) - config.CalcInterval) is not None
+                        and position_cache[person_id].get(calc_target_frame_num) is not None
                     ):
-                        before_person = position_cache[person_id][int(current_frame_num) - config.CalcInterval]
+                        before_person = position_cache[person_id][calc_target_frame_num]
                         before_warped_keypoints = warp_keypoints(before_person.keypoints)
                         before_person_position = before_warped_keypoints[KeypointEnum.LEFT_ANKLE]
 
