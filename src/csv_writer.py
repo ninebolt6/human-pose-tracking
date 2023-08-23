@@ -59,6 +59,14 @@ class DistanceDegreeWriter(CsvWriterBase):
         self.append_raw_data(target_header[0], distance)
         self.append_raw_data(target_header[1], degree)
 
+    def append_distance(self, person_id: int, distance: float64):
+        target_header = self.generate_header(person_id)
+        self.append_raw_data(target_header[0], distance)
+
+    def append_degree(self, person_id: int, degree: float64):
+        target_header = self.generate_header(person_id)
+        self.append_raw_data(target_header[1], degree)
+
 
 class RelativePositionWriter(CsvWriterBase):
     def generate_header(self, id: int) -> list[str]:
