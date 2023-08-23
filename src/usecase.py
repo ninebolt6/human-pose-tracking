@@ -50,6 +50,10 @@ def get_middle_hip(keypoints: dict[KeypointEnum, WarpedKeypoint]) -> Midpoint:
     return Midpoint(keypoints[KeypointEnum.LEFT_HIP], keypoints[KeypointEnum.RIGHT_HIP])
 
 
+def is_both_hip_exist(keypoints: dict[KeypointEnum, WarpedKeypoint]) -> bool:
+    return keypoints[KeypointEnum.LEFT_HIP].xy is not None and keypoints[KeypointEnum.RIGHT_HIP].xy is not None
+
+
 def drop_outside(xy: np.ndarray, size: tuple[int, int]) -> np.ndarray | None:
     if xy[0] < 0 or xy[1] < 0 or xy[0] > size[0] or xy[1] > size[1]:
         return None

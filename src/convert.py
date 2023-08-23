@@ -14,7 +14,7 @@ from csv_writer import (
 )
 from dataclass import Person
 from keypoint import KeypointEnum
-from usecase import get_body_orientation, get_middle_hip, warp_keypoints
+from usecase import get_body_orientation, get_middle_hip, is_both_hip_exist, warp_keypoints
 from util import as_person
 
 
@@ -91,12 +91,7 @@ def convert():
                             relative_position = current_person_position.xy - before_person_position.xy
                             relative_position_writer.append(person_id, relative_position)
 
-                        if (
-                            before_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
-                            and before_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
-                            and current_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
-                            and current_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
-                        ):
+                        if is_both_hip_exist(current_warped_keypoints) and is_both_hip_exist(before_warped_keypoints):
                             # 角度
                             current_middle_hip = get_middle_hip(current_warped_keypoints)
                             before_middle_hip = get_middle_hip(before_warped_keypoints)
