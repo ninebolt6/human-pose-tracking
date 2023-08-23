@@ -38,12 +38,27 @@ def warp_keypoints(keypoints: dict[KeypointEnum, Keypoint]) -> dict[KeypointEnum
     return {key: WarpedKeypoint(value) for (key, value) in keypoints.items()}
 
 
-def get_body_orientation(
-    before_middle_hip: Midpoint, current_middle_hip: Midpoint, before_left_hip: Keypoint | WarpedKeypoint
-) -> np.float64:
-    assert before_left_hip.xy is not None
+def get_body_orientation(before_middle_hip: Midpoint, current_middle_hip: Midpoint) -> np.float64:
+    # 極座標系で考える
+    deg = np.degrees(
+        np.arctan2(
+            current_middle_hip.xy[1] - before_middle_hip.xy[1], current_middle_hip.xy[0] - before_middle_hip.xy[0]
+        )
+    )
 
-    return 90 - to_degree(angle(before_middle_hip.xy, current_middle_hip.xy, before_left_hip.xy))
+    # 360度に変換
+    if deg < 0:
+        deg += 360
+
+    result = deg - 90
+    if result < 0:
+        result += 360
+
+    if result >= 360:
+        result -= 360
+
+    assert 0.0 <= result < 360.0
+    return result
 
 
 def get_middle_hip(keypoints: dict[KeypointEnum, WarpedKeypoint]) -> Midpoint:
