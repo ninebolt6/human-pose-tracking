@@ -80,6 +80,16 @@ def convert():
                     ):
                         before_person = position_cache[person_id][int(current_frame_num) - config.CalcInterval]
                         before_warped_keypoints = warp_keypoints(before_person.keypoints)
+                        before_person_position = before_warped_keypoints[KeypointEnum.LEFT_ANKLE]
+
+                        if before_person_position.xy is not None and current_person_position.xy is not None:
+                            # 距離
+                            distance = length(before_person_position.xy, current_person_position.xy)
+                            distance_degree_writer.append_distance(person_id, distance)
+
+                            # 相対位置座標
+                            relative_position = current_person_position.xy - before_person_position.xy
+                            relative_position_writer.append(person_id, relative_position)
 
                         if (
                             before_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
@@ -87,21 +97,13 @@ def convert():
                             and current_warped_keypoints[KeypointEnum.LEFT_HIP].xy is not None
                             and current_warped_keypoints[KeypointEnum.RIGHT_HIP].xy is not None
                         ):
-                            # 距離・角度
+                            # 角度
                             current_middle_hip = get_middle_hip(current_warped_keypoints)
                             before_middle_hip = get_middle_hip(before_warped_keypoints)
-                            distance = length(before_middle_hip.xy, current_middle_hip.xy)
                             degree = get_body_orientation(
                                 before_middle_hip, current_middle_hip, current_warped_keypoints[KeypointEnum.LEFT_HIP]
                             )
-
-                            distance_degree_writer.append(person_id, distance, degree)
-
-                        # 相対位置座標
-                        before_person_position = before_warped_keypoints[KeypointEnum.LEFT_ANKLE]
-                        if before_person_position.xy is not None and current_person_position.xy is not None:
-                            relative_position = current_person_position.xy - before_person_position.xy
-                            relative_position_writer.append(person_id, relative_position)
+                            distance_degree_writer.append_degree(person_id, degree)
 
                         # 書き込めたらキャッシュを削除する
                         del position_cache[person_id]
