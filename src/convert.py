@@ -13,7 +13,6 @@ from csv_writer import (
     RelativePositionWriter,
 )
 from dataclass import Person
-from keypoint import KeypointEnum
 from usecase import get_body_orientation, get_middle_hip, is_both_hip_exist, warp_keypoints
 from util import as_person
 
@@ -79,14 +78,14 @@ def convert():
                     current_warped_keypoints = warp_keypoints(current_person_dict[person_id].keypoints)
 
                     # 位置座標
-                    current_person_position = current_warped_keypoints[KeypointEnum.LEFT_ANKLE]
+                    current_person_position = current_warped_keypoints[config.PersonPositionPoint]
                     if current_person_position.xy is not None:
                         position_writer.append(person_id, current_person_position)
 
                     if is_calc_target_exist(position_cache, person_id, calc_target_frame_num):
                         before_person = position_cache[person_id][calc_target_frame_num]
                         before_warped_keypoints = warp_keypoints(before_person.keypoints)
-                        before_person_position = before_warped_keypoints[KeypointEnum.LEFT_ANKLE]
+                        before_person_position = before_warped_keypoints[config.PersonPositionPoint]
 
                         if before_person_position.xy is not None and current_person_position.xy is not None:
                             # 距離

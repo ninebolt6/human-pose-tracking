@@ -2,6 +2,8 @@ import configparser
 from dataclasses import dataclass
 import json
 
+from keypoint import KeypointEnum
+
 config = configparser.ConfigParser()
 config.read("config/config.ini")
 
@@ -25,6 +27,7 @@ class TrackConfig(CommonConfig):
 class ConvertConfig(CommonConfig):
     InputPath: str
     CalcInterval: int
+    PersonPositionPoint: KeypointEnum
 
 
 def get_common_config() -> CommonConfig:
@@ -58,4 +61,5 @@ def get_convert_config():
         DestinationSize=common_config.DestinationSize,
         InputPath=config["convert"]["InputPath"],
         CalcInterval=config["convert"].getint("CalcInterval"),
+        PersonPositionPoint=KeypointEnum[config["convert"]["PersonPositionPoint"]],
     )
