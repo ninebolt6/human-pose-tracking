@@ -1,9 +1,11 @@
 import csv
+from abc import ABCMeta, abstractmethod
 from io import TextIOWrapper
 from itertools import chain
+
 from numpy import float64, ndarray
+
 from usecase import WarpedKeypoint
-from abc import ABCMeta, abstractmethod
 
 
 class CsvWriterBase(metaclass=ABCMeta):

@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from dataclass import Keypoint
 from usecase import Midpoint, get_body_orientation
 

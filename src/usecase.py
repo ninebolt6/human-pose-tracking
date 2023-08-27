@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from calc import angle, to_degree, trans_mat, warp
+from calc import trans_mat, warp
 from config import get_common_config
 from dataclass import Keypoint
 from keypoint import KeypointEnum

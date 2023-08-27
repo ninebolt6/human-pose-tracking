@@ -7,16 +7,11 @@ from tqdm import tqdm
 
 from calc import length
 from config import get_convert_config
-from csv_writer import (
-    PositionWriter,
-    DistanceDegreeWriter,
-    RelativePositionWriter,
-)
+from csv_writer import DistanceDegreeWriter, PositionWriter, RelativePositionWriter
 from dataclass import Keypoint, Person
 from position_cache import CacheManager
 from usecase import Midpoint, WarpedKeypoint, get_body_orientation, get_middle_hip, is_both_hip_exist, warp_keypoints
 from util import as_person
-
 
 # 設定の読み込み
 config = get_convert_config()

@@ -1,4 +1,5 @@
 from typing import TypeAlias
+
 from dataclass import Person
 
 FrameNum: TypeAlias = int

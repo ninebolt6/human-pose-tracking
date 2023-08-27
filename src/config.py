@@ -1,6 +1,6 @@
 import configparser
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 
 from keypoint import KeypointEnum
 
