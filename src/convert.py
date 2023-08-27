@@ -55,7 +55,7 @@ def convert():
     ) as distance_degree_out, open(
         os.path.join(CSV_OUTPUT_FOLDER, f"out_relative_position_{EXEC_TIME}.csv"), "w", encoding="utf-8", newline=""
     ) as relative_position_out:
-        # Writerの準備
+        # 準備
         position_writer = PositionWriter(position_out, max_person_count)
         distance_degree_writer = DistanceDegreeWriter(distance_degree_out, max_person_count)
         relative_position_writer = RelativePositionWriter(relative_position_out, max_person_count)
@@ -74,9 +74,9 @@ def convert():
                     current_person = current_person_dict[person_id]
                     current_warped_keypoints = warp_keypoints(current_person.keypoints)
 
-                    # 位置座標
                     current_person_position = current_warped_keypoints[config.PersonPositionPoint]
                     if validate_point(current_person_position):
+                        # 位置座標の書き込み
                         position_writer.append(person_id, current_person_position)
 
                     if position_cache.is_calc_target_exist(person_id, calc_target_frame_num):
@@ -89,11 +89,11 @@ def convert():
 
                         if validate_point(before_person_position) and validate_point(current_person_position):
                             assert before_person_position.xy is not None and current_person_position.xy is not None
-                            # 距離
+                            # 距離の書き込み
                             distance = length(before_person_position.xy, current_person_position.xy)
                             distance_degree_writer.append_distance(person_id, distance)
 
-                            # 相対位置座標
+                            # 相対位置座標の書き込み
                             relative_position = current_person_position.xy - before_person_position.xy
                             relative_position_writer.append(person_id, relative_position)
 
@@ -102,7 +102,7 @@ def convert():
                             before_middle_hip = get_middle_hip(before_warped_keypoints)
 
                             if validate_point(current_middle_hip) and validate_point(before_middle_hip):
-                                # 角度
+                                # 角度の書き込み
                                 degree = get_body_orientation(before_middle_hip, current_middle_hip)
                                 distance_degree_writer.append_degree(person_id, degree)
 
@@ -112,7 +112,7 @@ def convert():
                     # キャッシュに保存
                     position_cache.add(current_person, current_frame_num)
 
-            # 1行の書き込み
+            # 実際にファイルに書き込む
             position_writer.writerow(current_frame_num)
             distance_degree_writer.writerow(current_frame_num)
             relative_position_writer.writerow(current_frame_num)
