@@ -32,7 +32,7 @@ class CsvWriterBase(metaclass=ABCMeta):
     def append(self):
         pass
 
-    def writerow(self, frame_num: str):
+    def writerow(self, frame_num: int):
         self.append_raw_data("frame_num", frame_num)
         self.writer.writerow(self.buf)
         self.__clear_buf()

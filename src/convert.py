@@ -25,8 +25,8 @@ KEYPOINT_JSON_PATH = os.path.join(config.OutputPath, config.InputPath, "keypoint
 EXEC_TIME = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
 
-def get_frame_num(filename: str) -> str:
-    return filename.replace("frame_", "").replace(".json", "")
+def get_frame_num(filename: str) -> int:
+    return int(filename.replace("frame_", "").replace(".json", ""))
 
 
 def validate_point(point: Keypoint | WarpedKeypoint | Midpoint) -> bool:
@@ -67,7 +67,7 @@ def convert():
                 current_list: list[Person] = json.load(current_file, object_hook=as_person)
                 current_person_dict = {person.person_id: person for person in current_list}
                 current_frame_num = get_frame_num(filename)
-                calc_target_frame_num = int(current_frame_num) - config.CalcInterval
+                calc_target_frame_num = current_frame_num - config.CalcInterval
 
             for person_id in range(1, max_person_count + 1):
                 if current_person_dict.get(person_id) is not None:
@@ -110,7 +110,7 @@ def convert():
                         position_cache.remove(person_id)
 
                     # キャッシュに保存
-                    position_cache.add(current_person, int(current_frame_num))
+                    position_cache.add(current_person, current_frame_num)
 
             # 1行の書き込み
             position_writer.writerow(current_frame_num)
