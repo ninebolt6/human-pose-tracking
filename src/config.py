@@ -28,6 +28,7 @@ class ConvertConfig(CommonConfig):
     InputPath: str
     CalcInterval: int
     PersonPositionPoint: KeypointEnum
+    ConfidenceThreshold: float
 
 
 def get_common_config() -> CommonConfig:
@@ -62,4 +63,5 @@ def get_convert_config():
         InputPath=config["convert"]["InputPath"],
         CalcInterval=config["convert"].getint("CalcInterval"),
         PersonPositionPoint=KeypointEnum[config["convert"]["PersonPositionPoint"]],
+        ConfidenceThreshold=config["convert"].getfloat("ConfidenceThreshold"),
     )

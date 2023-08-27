@@ -12,8 +12,8 @@ from csv_writer import (
     DistanceDegreeWriter,
     RelativePositionWriter,
 )
-from dataclass import Person
-from usecase import get_body_orientation, get_middle_hip, is_both_hip_exist, warp_keypoints
+from dataclass import Keypoint, Person
+from usecase import Midpoint, WarpedKeypoint, get_body_orientation, get_middle_hip, is_both_hip_exist, warp_keypoints
 from util import as_person
 
 
@@ -34,6 +34,10 @@ def is_calc_target_exist(
     return (
         position_cache.get(person_id) is not None and position_cache[person_id].get(calc_target_frame_num) is not None
     )
+
+
+def validate_point(point: Keypoint | WarpedKeypoint | Midpoint) -> bool:
+    return point.xy is not None and point.confidence >= config.ConfidenceThreshold  # type: ignore
 
 
 def convert():
@@ -79,7 +83,7 @@ def convert():
 
                     # 位置座標
                     current_person_position = current_warped_keypoints[config.PersonPositionPoint]
-                    if current_person_position.xy is not None:
+                    if validate_point(current_person_position):
                         position_writer.append(person_id, current_person_position)
 
                     if is_calc_target_exist(position_cache, person_id, calc_target_frame_num):
@@ -87,7 +91,8 @@ def convert():
                         before_warped_keypoints = warp_keypoints(before_person.keypoints)
                         before_person_position = before_warped_keypoints[config.PersonPositionPoint]
 
-                        if before_person_position.xy is not None and current_person_position.xy is not None:
+                        if validate_point(before_person_position) and validate_point(current_person_position):
+                            assert before_person_position.xy is not None and current_person_position.xy is not None
                             # 距離
                             distance = length(before_person_position.xy, current_person_position.xy)
                             distance_degree_writer.append_distance(person_id, distance)
@@ -100,9 +105,10 @@ def convert():
                             current_middle_hip = get_middle_hip(current_warped_keypoints)
                             before_middle_hip = get_middle_hip(before_warped_keypoints)
 
-                            # 角度
-                            degree = get_body_orientation(before_middle_hip, current_middle_hip)
-                            distance_degree_writer.append_degree(person_id, degree)
+                            if validate_point(current_middle_hip) and validate_point(before_middle_hip):
+                                # 角度
+                                degree = get_body_orientation(before_middle_hip, current_middle_hip)
+                                distance_degree_writer.append_degree(person_id, degree)
 
                         # 書き込めたらキャッシュを削除する
                         del position_cache[person_id]
