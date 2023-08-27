@@ -13,6 +13,7 @@ from csv_writer import (
     RelativePositionWriter,
 )
 from dataclass import Keypoint, Person
+from position_cache import CacheManager
 from usecase import Midpoint, WarpedKeypoint, get_body_orientation, get_middle_hip, is_both_hip_exist, warp_keypoints
 from util import as_person
 
@@ -26,14 +27,6 @@ EXEC_TIME = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
 def get_frame_num(filename: str) -> str:
     return filename.replace("frame_", "").replace(".json", "")
-
-
-def is_calc_target_exist(
-    position_cache: dict[int, dict[int, Person]], person_id: int, calc_target_frame_num: int
-) -> bool:
-    return (
-        position_cache.get(person_id) is not None and position_cache[person_id].get(calc_target_frame_num) is not None
-    )
 
 
 def validate_point(point: Keypoint | WarpedKeypoint | Midpoint) -> bool:
@@ -66,8 +59,7 @@ def convert():
         position_writer = PositionWriter(position_out, max_person_count)
         distance_degree_writer = DistanceDegreeWriter(distance_degree_out, max_person_count)
         relative_position_writer = RelativePositionWriter(relative_position_out, max_person_count)
-        # key: person_id, value: (key: frame_num, value: person)
-        position_cache: dict[int, dict[int, Person]] = {}
+        position_cache = CacheManager()
 
         for filename in tqdm(files, unit="frame", total=len(files) - 1):
             # フレームファイルの読み込み
@@ -79,15 +71,19 @@ def convert():
 
             for person_id in range(1, max_person_count + 1):
                 if current_person_dict.get(person_id) is not None:
-                    current_warped_keypoints = warp_keypoints(current_person_dict[person_id].keypoints)
+                    current_person = current_person_dict[person_id]
+                    current_warped_keypoints = warp_keypoints(current_person.keypoints)
 
                     # 位置座標
                     current_person_position = current_warped_keypoints[config.PersonPositionPoint]
                     if validate_point(current_person_position):
                         position_writer.append(person_id, current_person_position)
 
-                    if is_calc_target_exist(position_cache, person_id, calc_target_frame_num):
-                        before_person = position_cache[person_id][calc_target_frame_num]
+                    if position_cache.is_calc_target_exist(person_id, calc_target_frame_num):
+                        cache = position_cache.get(person_id)
+                        assert cache is not None
+
+                        before_person = cache[calc_target_frame_num]
                         before_warped_keypoints = warp_keypoints(before_person.keypoints)
                         before_person_position = before_warped_keypoints[config.PersonPositionPoint]
 
@@ -111,13 +107,10 @@ def convert():
                                 distance_degree_writer.append_degree(person_id, degree)
 
                         # 書き込めたらキャッシュを削除する
-                        del position_cache[person_id]
+                        position_cache.remove(person_id)
 
                     # キャッシュに保存
-                    if position_cache.get(person_id) is None:
-                        position_cache[person_id] = {}
-
-                    position_cache[person_id][int(current_frame_num)] = current_person_dict[person_id]
+                    position_cache.add(current_person, int(current_frame_num))
 
             # 1行の書き込み
             position_writer.writerow(current_frame_num)
