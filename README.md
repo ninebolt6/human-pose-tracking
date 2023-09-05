@@ -24,3 +24,11 @@ track で生成されたフォルダの名前を `config/config.ini` 内の`conv
 ```bash
 $ rye run convert
 ```
+
+#### 信頼度出力 (confidence)
+
+位置座標の信頼度を出力する
+
+```bash
+$ rye run confidence
+```

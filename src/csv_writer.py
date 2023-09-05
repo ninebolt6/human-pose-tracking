@@ -78,3 +78,12 @@ class RelativePositionWriter(CsvWriterBase):
         target_header = self.generate_header(person_id)
         self.append_raw_data(target_header[0], relative_position[0])
         self.append_raw_data(target_header[1], relative_position[1])
+
+
+class ConfidenceWriter(CsvWriterBase):
+    def generate_header(self, id: int) -> list[str]:
+        return [f"id:{id} conf"]
+
+    def append(self, person_id: int, confidence: ndarray):
+        target_header = self.generate_header(person_id)
+        self.append_raw_data(target_header[0], confidence)

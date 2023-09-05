@@ -28,6 +28,7 @@ dev-dependencies = [
 [tool.rye.scripts]
 track = "python src/track.py"
 convert = "python src/convert.py"
+confidence = "python src/confidence.py"
 test = "pytest src/tests"
 
 [[tool.rye.sources]]
