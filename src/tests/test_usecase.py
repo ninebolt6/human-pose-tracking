@@ -50,14 +50,46 @@ def test_get_body_orientation(degree, expected):
     assert np.allclose(get_body_orientation(before_middle_hip, current_middle_hip), expected)
 
 
-test_new_deg_params = [([1, 0], 315.0), ([1, 1], 0.0), ([-1, 0], 135.0)]
+test_get_body_degree_origin_params = [
+    ([1, 0], 0.0),
+    ([1, 1], 315.0),
+    ([0, 1], 270.0),
+    ([-1, 1], 225.0),
+    ([-1, 0], 180.0),
+    ([-1, -1], 135.0),
+    ([0, -1], 90.0),
+    ([1, -1], 45.0),
+]
 
 
-@pytest.mark.parametrize("before_right_point, expected", test_new_deg_params)
-def test_new_deg(before_right_point, expected):
+@pytest.mark.parametrize("before_right_point, expected", test_get_body_degree_origin_params)
+def test_get_body_degree_origin(before_right_point, expected):
     before_middle_hip = create_midpoint(np.array([0, 0]))
     before_right_hip = Keypoint(xy=np.array(before_right_point), confidence=np.array(1))
-    current_middle_hip = create_midpoint(create_polar_coordinate(45))
+    current_middle_hip = create_midpoint(create_polar_coordinate(90))
+
+    degree = get_body_degree(before_middle_hip, before_right_hip, current_middle_hip)
+
+    assert np.allclose(degree, expected)
+
+
+test_get_body_degree_params = [
+    ([2, 1], 225.0),
+    ([2, 2], 270.0),
+    ([1, 2], 315.0),
+    ([0, 2], 0.0),
+    ([0, 1], 45.0),
+    ([0, 0], 90.0),
+    ([1, 0], 135.0),
+    ([2, 0], 180.0),
+]
+
+
+@pytest.mark.parametrize("before_right_point, expected", test_get_body_degree_params)
+def test_get_body_degree(before_right_point, expected):
+    before_middle_hip = create_midpoint(np.array([1, 1]))
+    before_right_hip = Keypoint(xy=np.array(before_right_point), confidence=np.array(1))
+    current_middle_hip = create_midpoint(create_polar_coordinate(315) + np.array([1, 1]))
 
     degree = get_body_degree(before_middle_hip, before_right_hip, current_middle_hip)
 

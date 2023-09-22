@@ -47,10 +47,10 @@ def get_body_orientation(before_middle_hip: Midpoint, current_middle_hip: Midpoi
     )
 
     # 360度に変換
-    if deg < 0:
+    if np.all(deg < 0):
         deg += 360
 
-    result = normalize_degree(deg - 90)
+    result = normalize_degree(deg - 90.0)
 
     return result
 
@@ -71,23 +71,27 @@ def drop_outside(xy: np.ndarray, size: tuple[int, int]) -> np.ndarray | None:
 
 def normalize_degree(deg: np.float64) -> np.float64:
     result = deg
-    if result < 0:
+    if np.any(result < 0):
         result += 360
 
-    if result >= 360:
+    if np.any(result >= 360):
         result -= 360
-
-    assert 0.0 <= result < 360.0
     return result
 
 
 def get_body_degree(before_middle_hip, before_right_hip, current_middle_hip):
-    middle_origin_before_right_hip = before_right_hip.xy - before_middle_hip.xy
-    people_rotation = np.degrees(np.arctan2(middle_origin_before_right_hip[1], middle_origin_before_right_hip[0]))
+    people_rotation = (
+        np.degrees(
+            np.arctan2(
+                before_right_hip.xy[1] - before_middle_hip.xy[1], before_right_hip.xy[0] - before_middle_hip.xy[0]
+            )
+        )
+        * -1
+    )
     if people_rotation < 0.0:
         people_rotation += 360
 
     degree = get_body_orientation(before_middle_hip, current_middle_hip)
-    degree = normalize_degree(degree + people_rotation)
+    degree = normalize_degree(degree - people_rotation)
 
     return degree
