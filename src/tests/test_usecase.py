@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from dataclass import Keypoint
-from usecase import Midpoint, get_body_orientation
+from usecase import Midpoint, get_body_degree, get_body_orientation
 
 
 def create_midpoint(cood: np.ndarray) -> Midpoint:
@@ -22,7 +22,7 @@ def create_polar_coordinate(deg: int) -> np.ndarray:
     )
 
 
-params = [
+test_get_body_orientation_params = [
     # 正面ならば0度
     (90, 0.0),
     # 左前ならば30度
@@ -42,9 +42,23 @@ params = [
 ]
 
 
-@pytest.mark.parametrize("degree, expected", params)
+@pytest.mark.parametrize("degree, expected", test_get_body_orientation_params)
 def test_get_body_orientation(degree, expected):
     before_middle_hip = create_midpoint(np.array([0, 0]))
     current_middle_hip = create_midpoint(create_polar_coordinate(degree))
 
     assert np.allclose(get_body_orientation(before_middle_hip, current_middle_hip), expected)
+
+
+test_new_deg_params = [([1, 0], 315.0), ([1, 1], 0.0), ([-1, 0], 135.0)]
+
+
+@pytest.mark.parametrize("before_right_point, expected", test_new_deg_params)
+def test_new_deg(before_right_point, expected):
+    before_middle_hip = create_midpoint(np.array([0, 0]))
+    before_right_hip = Keypoint(xy=np.array(before_right_point), confidence=np.array(1))
+    current_middle_hip = create_midpoint(create_polar_coordinate(45))
+
+    degree = get_body_degree(before_middle_hip, before_right_hip, current_middle_hip)
+
+    assert np.allclose(degree, expected)

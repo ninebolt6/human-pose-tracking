@@ -79,3 +79,15 @@ def normalize_degree(deg: np.float64) -> np.float64:
 
     assert 0.0 <= result < 360.0
     return result
+
+
+def get_body_degree(before_middle_hip, before_right_hip, current_middle_hip):
+    middle_origin_before_right_hip = before_right_hip.xy - before_middle_hip.xy
+    people_rotation = np.degrees(np.arctan2(middle_origin_before_right_hip[1], middle_origin_before_right_hip[0]))
+    if people_rotation < 0.0:
+        people_rotation += 360
+
+    degree = get_body_orientation(before_middle_hip, current_middle_hip)
+    degree = normalize_degree(degree + people_rotation)
+
+    return degree
