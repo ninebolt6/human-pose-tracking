@@ -14,4 +14,4 @@ ShowPreview = False
 InputPath = 20230807_121818
 CalcInterval = 15
 PersonPositionPoint = LEFT_ANKLE
-ConfidenceThreshold = 0.3
+ConfidenceThreshold = 0.0

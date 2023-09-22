@@ -3,14 +3,24 @@ import os
 from datetime import datetime
 
 from natsort import natsorted
+import numpy as np
 from tqdm import tqdm
 
-from calc import length
+from calc import angle, length
 from config import get_convert_config
 from csv_writer import DistanceDegreeWriter, PositionWriter, RelativePositionWriter
 from dataclass import Keypoint, Person
+from keypoint import KeypointEnum
 from position_cache import CacheManager
-from usecase import Midpoint, WarpedKeypoint, get_body_orientation, get_middle_hip, is_both_hip_exist, warp_keypoints
+from usecase import (
+    Midpoint,
+    WarpedKeypoint,
+    get_body_orientation,
+    get_middle_hip,
+    is_both_hip_exist,
+    normalize_degree,
+    warp_keypoints,
+)
 from util import as_person
 
 # 設定の読み込み
@@ -95,10 +105,48 @@ def convert():
                         if is_both_hip_exist(current_warped_keypoints) and is_both_hip_exist(before_warped_keypoints):
                             current_middle_hip = get_middle_hip(current_warped_keypoints)
                             before_middle_hip = get_middle_hip(before_warped_keypoints)
+                            before_left_hip = before_warped_keypoints[KeypointEnum.LEFT_HIP]
+                            before_right_hip = before_warped_keypoints[KeypointEnum.RIGHT_HIP]
+                            assert before_left_hip.xy is not None and before_right_hip.xy is not None
 
                             if validate_point(current_middle_hip) and validate_point(before_middle_hip):
+                                heikou_idou = before_right_hip.xy - before_middle_hip.xy
+                                # 極座標系で考える
+                                nasu_kaku = np.degrees(np.arctan2(heikou_idou[1], heikou_idou[0]))
+
+                                # 場合分け
+                                # if (
+                                #     current_middle_hip.xy[0] <= before_middle_hip.xy[0]
+                                #     and current_middle_hip.xy[1] <= before_middle_hip.xy[1]
+                                # ):
+                                #     degree = 90.0 - angle(
+                                #         before_middle_hip.xy, before_left_hip.xy, current_middle_hip.xy
+                                #     )
+                                # elif (
+                                #     current_middle_hip.xy[0] <= before_middle_hip.xy[0]
+                                #     and current_middle_hip.xy[1] > before_middle_hip.xy[1]
+                                # ):
+                                #     degree = 90 + angle(before_middle_hip.xy, before_left_hip.xy, current_middle_hip.xy)
+                                # elif (
+                                #     current_middle_hip.xy[0] > before_middle_hip.xy[0]
+                                #     and current_middle_hip.xy[1] > before_middle_hip.xy[1]
+                                # ):
+                                #     degree = 270 - angle(
+                                #         before_middle_hip.xy, before_right_hip.xy, current_middle_hip.xy
+                                #     )
+                                # elif (
+                                #     current_middle_hip.xy[0] > before_middle_hip.xy[0]
+                                #     and current_middle_hip.xy[1] <= before_middle_hip.xy[1]
+                                # ):
+                                #     degree = 270 + angle(
+                                #         before_middle_hip.xy, before_right_hip.xy, current_middle_hip.xy
+                                #     )
+
+                                # relative_hip_position = current_middle_hip.xy - before_middle_hip.xy
                                 # 角度の書き込み
+                                # degree = get_body_orientation(np.array([0, 0]), relative_hip_position)
                                 degree = get_body_orientation(before_middle_hip, current_middle_hip)
+                                degree = normalize_degree(degree + nasu_kaku)
                                 distance_degree_writer.append_degree(person_id, degree)
 
                         # 書き込めたらキャッシュを削除する

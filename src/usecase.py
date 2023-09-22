@@ -50,14 +50,8 @@ def get_body_orientation(before_middle_hip: Midpoint, current_middle_hip: Midpoi
     if deg < 0:
         deg += 360
 
-    result = deg - 90
-    if result < 0:
-        result += 360
+    result = normalize_degree(deg - 90)
 
-    if result >= 360:
-        result -= 360
-
-    assert 0.0 <= result < 360.0
     return result
 
 
@@ -73,3 +67,15 @@ def drop_outside(xy: np.ndarray, size: tuple[int, int]) -> np.ndarray | None:
     if xy[0] < 0 or xy[1] < 0 or xy[0] > size[0] or xy[1] > size[1]:
         return None
     return xy
+
+
+def normalize_degree(deg: np.float64) -> np.float64:
+    result = deg
+    if result < 0:
+        result += 360
+
+    if result >= 360:
+        result -= 360
+
+    assert 0.0 <= result < 360.0
+    return result
