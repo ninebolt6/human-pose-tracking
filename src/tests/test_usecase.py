@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from dataclass import Keypoint
-from usecase import Midpoint, get_body_degree, get_body_orientation
+from usecase import Midpoint, get_moved_degree, get_screen_orientation
 
 
 def create_midpoint(cood: np.ndarray) -> Midpoint:
@@ -47,7 +47,7 @@ def test_get_body_orientation(degree, expected):
     before_middle_hip = create_midpoint(np.array([0, 0]))
     current_middle_hip = create_midpoint(create_polar_coordinate(degree))
 
-    assert np.allclose(get_body_orientation(before_middle_hip, current_middle_hip), expected)
+    assert np.allclose(get_screen_orientation(before_middle_hip, current_middle_hip), expected)
 
 
 test_get_body_degree_origin_params = [
@@ -68,7 +68,7 @@ def test_get_body_degree_origin(before_right_point, expected):
     before_right_hip = Keypoint(xy=np.array(before_right_point), confidence=np.array(1))
     current_middle_hip = create_midpoint(create_polar_coordinate(90))
 
-    degree = get_body_degree(before_middle_hip, before_right_hip, current_middle_hip)
+    degree = get_moved_degree(before_middle_hip, before_right_hip, current_middle_hip)
 
     assert np.allclose(degree, expected)
 
@@ -91,6 +91,6 @@ def test_get_body_degree(before_right_point, expected):
     before_right_hip = Keypoint(xy=np.array(before_right_point), confidence=np.array(1))
     current_middle_hip = create_midpoint(create_polar_coordinate(315) + np.array([1, 1]))
 
-    degree = get_body_degree(before_middle_hip, before_right_hip, current_middle_hip)
+    degree = get_moved_degree(before_middle_hip, before_right_hip, current_middle_hip)
 
     assert np.allclose(degree, expected)

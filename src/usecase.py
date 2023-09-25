@@ -38,23 +38,6 @@ def warp_keypoints(keypoints: dict[KeypointEnum, Keypoint]) -> dict[KeypointEnum
     return {key: WarpedKeypoint(value) for (key, value) in keypoints.items()}
 
 
-def get_body_orientation(before_middle_hip: Midpoint, current_middle_hip: Midpoint) -> np.float64:
-    # 極座標系で考える
-    deg = np.degrees(
-        np.arctan2(
-            current_middle_hip.xy[1] - before_middle_hip.xy[1], current_middle_hip.xy[0] - before_middle_hip.xy[0]
-        )
-    )
-
-    # 360度に変換
-    if np.all(deg < 0):
-        deg += 360
-
-    result = normalize_degree(deg - 90.0)
-
-    return result
-
-
 def get_middle_hip(keypoints: dict[KeypointEnum, WarpedKeypoint]) -> Midpoint:
     return Midpoint(keypoints[KeypointEnum.LEFT_HIP], keypoints[KeypointEnum.RIGHT_HIP])
 
@@ -79,8 +62,25 @@ def normalize_degree(deg: np.float64) -> np.float64:
     return result
 
 
-def get_body_degree(before_middle_hip, before_right_hip, current_middle_hip):
-    people_rotation = (
+def get_screen_orientation(before_middle_hip: Midpoint, current_middle_hip: Midpoint) -> np.float64:
+    # 極座標系で考える
+    deg = np.degrees(
+        np.arctan2(
+            current_middle_hip.xy[1] - before_middle_hip.xy[1], current_middle_hip.xy[0] - before_middle_hip.xy[0]
+        )
+    )
+
+    # 360度に変換
+    if np.all(deg < 0):
+        deg += 360
+
+    result = normalize_degree(deg - 90.0)
+
+    return result
+
+
+def get_body_orientation(before_middle_hip, before_right_hip):
+    result = (
         np.degrees(
             np.arctan2(
                 before_right_hip.xy[1] - before_middle_hip.xy[1], before_right_hip.xy[0] - before_middle_hip.xy[0]
@@ -88,10 +88,16 @@ def get_body_degree(before_middle_hip, before_right_hip, current_middle_hip):
         )
         * -1
     )
-    if people_rotation < 0.0:
-        people_rotation += 360
 
-    degree = get_body_orientation(before_middle_hip, current_middle_hip)
-    degree = normalize_degree(degree - people_rotation)
+    if result < 0.0:
+        result += 360
 
+    return result
+
+
+def get_moved_degree(before_middle_hip, before_right_hip, current_middle_hip):
+    screen_orientation = get_screen_orientation(before_middle_hip, current_middle_hip)
+    body_orientation = get_body_orientation(before_middle_hip, before_right_hip)
+
+    degree = normalize_degree(screen_orientation - body_orientation)
     return degree
