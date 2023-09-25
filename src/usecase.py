@@ -52,7 +52,7 @@ def drop_outside(xy: np.ndarray, size: tuple[int, int]) -> np.ndarray | None:
     return xy
 
 
-def normalize_degree(deg: np.float64) -> np.float64:
+def normalize_degree(deg) -> np.float64:
     result = deg
     if np.any(result < 0):
         result += 360
@@ -62,36 +62,35 @@ def normalize_degree(deg: np.float64) -> np.float64:
     return result
 
 
+def reverse_y_axis(xy: np.ndarray) -> np.ndarray:
+    return np.array([xy[0], -xy[1]])
+
+
 def get_screen_orientation(before_middle_hip: Midpoint, current_middle_hip: Midpoint) -> np.float64:
+    # 画面下向きをy軸の正とするため、y軸を反転させる
+    before_middle_hip_xy = reverse_y_axis(before_middle_hip.xy)
+    current_middle_hip_xy = reverse_y_axis(current_middle_hip.xy)
+
     # 極座標系で考える
     deg = np.degrees(
         np.arctan2(
-            current_middle_hip.xy[1] - before_middle_hip.xy[1], current_middle_hip.xy[0] - before_middle_hip.xy[0]
+            current_middle_hip_xy[1] - before_middle_hip_xy[1],
+            current_middle_hip_xy[0] - before_middle_hip_xy[0],
         )
     )
 
-    # 360度に変換
-    if np.all(deg < 0):
-        deg += 360
-
-    result = normalize_degree(deg - 90.0)
-
+    # 画面の上方向を0度とするため、90度を引く
+    result = normalize_degree(deg - 90)
     return result
 
 
-def get_body_orientation(before_middle_hip, before_right_hip):
-    result = (
-        np.degrees(
-            np.arctan2(
-                before_right_hip.xy[1] - before_middle_hip.xy[1], before_right_hip.xy[0] - before_middle_hip.xy[0]
-            )
-        )
-        * -1
+def get_body_orientation(before_middle_hip: Midpoint, before_right_hip: Keypoint):
+    # 極座標系で考える
+    deg = np.degrees(
+        np.arctan2(before_right_hip.xy[1] - before_middle_hip.xy[1], before_right_hip.xy[0] - before_middle_hip.xy[0])
     )
 
-    if result < 0.0:
-        result += 360
-
+    result = normalize_degree(deg)
     return result
 
 
@@ -99,5 +98,5 @@ def get_moved_degree(before_middle_hip, before_right_hip, current_middle_hip):
     screen_orientation = get_screen_orientation(before_middle_hip, current_middle_hip)
     body_orientation = get_body_orientation(before_middle_hip, before_right_hip)
 
-    degree = normalize_degree(screen_orientation - body_orientation)
+    degree = normalize_degree(screen_orientation + body_orientation)
     return degree
