@@ -15,6 +15,7 @@ dataspace/
 *.jpg
 *.jpeg
 *.mp4
+*.avi
 
 # outputs
 out/
