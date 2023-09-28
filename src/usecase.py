@@ -38,29 +38,6 @@ def warp_keypoints(keypoints: dict[KeypointEnum, Keypoint]) -> dict[KeypointEnum
     return {key: WarpedKeypoint(value) for (key, value) in keypoints.items()}
 
 
-def get_body_orientation(before_middle_hip: Midpoint, current_middle_hip: Midpoint) -> np.float64:
-    # 極座標系で考える
-    deg = np.degrees(
-        np.arctan2(
-            current_middle_hip.xy[1] - before_middle_hip.xy[1], current_middle_hip.xy[0] - before_middle_hip.xy[0]
-        )
-    )
-
-    # 360度に変換
-    if deg < 0:
-        deg += 360
-
-    result = deg - 90
-    if result < 0:
-        result += 360
-
-    if result >= 360:
-        result -= 360
-
-    assert 0.0 <= result < 360.0
-    return result
-
-
 def get_middle_hip(keypoints: dict[KeypointEnum, WarpedKeypoint]) -> Midpoint:
     return Midpoint(keypoints[KeypointEnum.LEFT_HIP], keypoints[KeypointEnum.RIGHT_HIP])
 
@@ -73,3 +50,53 @@ def drop_outside(xy: np.ndarray, size: tuple[int, int]) -> np.ndarray | None:
     if xy[0] < 0 or xy[1] < 0 or xy[0] > size[0] or xy[1] > size[1]:
         return None
     return xy
+
+
+def normalize_degree(deg) -> np.float64:
+    result = deg
+    if np.any(result < 0):
+        result += 360
+
+    if np.any(result >= 360):
+        result -= 360
+    return result
+
+
+def reverse_y_axis(xy: np.ndarray) -> np.ndarray:
+    return np.array([xy[0], -xy[1]])
+
+
+def get_screen_orientation(before_middle_hip: Midpoint, current_middle_hip: Midpoint) -> np.float64:
+    # 画面下向きをy軸の正とするため、y軸を反転させる
+    before_middle_hip_xy = reverse_y_axis(before_middle_hip.xy)
+    current_middle_hip_xy = reverse_y_axis(current_middle_hip.xy)
+
+    # 極座標系で考える
+    deg = np.degrees(
+        np.arctan2(
+            current_middle_hip_xy[1] - before_middle_hip_xy[1],
+            current_middle_hip_xy[0] - before_middle_hip_xy[0],
+        )
+    )
+
+    # 画面の上方向を0度とするため、90度を引く
+    result = normalize_degree(deg - 90)
+    return result
+
+
+def get_body_orientation(before_middle_hip: Midpoint, before_right_hip: Keypoint):
+    # 極座標系で考える
+    deg = np.degrees(
+        np.arctan2(before_right_hip.xy[1] - before_middle_hip.xy[1], before_right_hip.xy[0] - before_middle_hip.xy[0])
+    )
+
+    result = normalize_degree(deg)
+    return result
+
+
+def get_moved_degree(before_middle_hip, before_right_hip, current_middle_hip):
+    screen_orientation = get_screen_orientation(before_middle_hip, current_middle_hip)
+    body_orientation = get_body_orientation(before_middle_hip, before_right_hip)
+
+    degree = normalize_degree(screen_orientation + body_orientation)
+    return degree

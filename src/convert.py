@@ -9,8 +9,16 @@ from calc import length
 from config import get_convert_config
 from csv_writer import DistanceDegreeWriter, PositionWriter, RelativePositionWriter
 from dataclass import Keypoint, Person
+from keypoint import KeypointEnum
 from position_cache import CacheManager
-from usecase import Midpoint, WarpedKeypoint, get_body_orientation, get_middle_hip, is_both_hip_exist, warp_keypoints
+from usecase import (
+    Midpoint,
+    WarpedKeypoint,
+    get_moved_degree,
+    get_middle_hip,
+    is_both_hip_exist,
+    warp_keypoints,
+)
 from util import as_person
 
 # 設定の読み込み
@@ -95,10 +103,13 @@ def convert():
                         if is_both_hip_exist(current_warped_keypoints) and is_both_hip_exist(before_warped_keypoints):
                             current_middle_hip = get_middle_hip(current_warped_keypoints)
                             before_middle_hip = get_middle_hip(before_warped_keypoints)
+                            before_left_hip = before_warped_keypoints[KeypointEnum.LEFT_HIP]
+                            before_right_hip = before_warped_keypoints[KeypointEnum.RIGHT_HIP]
+                            assert before_left_hip.xy is not None and before_right_hip.xy is not None
 
                             if validate_point(current_middle_hip) and validate_point(before_middle_hip):
                                 # 角度の書き込み
-                                degree = get_body_orientation(before_middle_hip, current_middle_hip)
+                                degree = get_moved_degree(before_middle_hip, before_right_hip, current_middle_hip)
                                 distance_degree_writer.append_degree(person_id, degree)
 
                         # 書き込めたらキャッシュを削除する

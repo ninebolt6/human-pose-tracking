@@ -25,3 +25,6 @@ out_prod/
 *.pt
 
 .vscode/
+
+# config
+config/config.ini
