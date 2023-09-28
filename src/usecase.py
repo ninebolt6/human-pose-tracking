@@ -52,6 +52,10 @@ def drop_outside(xy: np.ndarray, size: tuple[int, int]) -> np.ndarray | None:
     return xy
 
 
+def polar_to_xy(r: np.float64, deg: np.float64) -> np.ndarray:
+    return np.array([r * np.cos(np.radians(deg)), r * np.sin(np.radians(deg))])
+
+
 def normalize_degree(deg) -> np.float64:
     result = deg
     if np.any(result < 0):
