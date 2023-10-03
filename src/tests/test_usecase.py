@@ -2,7 +2,14 @@ import numpy as np
 import pytest
 
 from dataclass import Keypoint
-from usecase import Midpoint, get_body_orientation, get_moved_degree, get_screen_orientation, normalize_degree
+from usecase import (
+    Midpoint,
+    get_body_orientation,
+    get_moved_degree,
+    get_screen_orientation,
+    normalize_degree,
+    polar_to_xy,
+)
 
 
 def create_midpoint(cood: np.ndarray) -> Midpoint:
@@ -124,3 +131,22 @@ def test_get_moved_degree(before_right_point, expected):
     degree = get_moved_degree(before_middle_hip, before_right_hip, current_middle_hip)
 
     assert np.allclose(degree, expected)
+
+
+@pytest.mark.parametrize(
+    "r, deg, expected",
+    [
+        (1.0, 0.0, [0, 1]),
+        (1.0, 90.0, [-1, 0]),
+        (1.0, 180.0, [0, -1]),
+        (1.0, 270.0, [1, 0]),
+        (1.0, 360.0, [0, 1]),
+        (2.0, 0.0, [0, 2]),
+        (2.0, 90.0, [-2, 0]),
+        (2.0, 180.0, [0, -2]),
+        (2.0, 270.0, [2, 0]),
+        (2.0, 360.0, [0, 2]),
+    ],
+)
+def test_polar_to_xy(r, deg, expected):
+    assert np.allclose(polar_to_xy(r, deg), np.array(expected))

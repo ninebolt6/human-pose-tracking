@@ -17,6 +17,7 @@ from usecase import (
     get_moved_degree,
     get_middle_hip,
     is_both_hip_exist,
+    polar_to_xy,
     warp_keypoints,
 )
 from util import as_person
@@ -90,15 +91,14 @@ def convert():
                         before_warped_keypoints = warp_keypoints(before_person.keypoints)
                         before_person_position = before_warped_keypoints[config.PersonPositionPoint]
 
+                        # 相対座標で使うのでdistanceを初期化しておく
+                        distance = None
+
                         if validate_point(before_person_position) and validate_point(current_person_position):
                             assert before_person_position.xy is not None and current_person_position.xy is not None
                             # 距離の書き込み
                             distance = length(before_person_position.xy, current_person_position.xy)
                             distance_degree_writer.append_distance(person_id, distance)
-
-                            # 相対位置座標の書き込み
-                            relative_position = current_person_position.xy - before_person_position.xy
-                            relative_position_writer.append(person_id, relative_position)
 
                         if is_both_hip_exist(current_warped_keypoints) and is_both_hip_exist(before_warped_keypoints):
                             current_middle_hip = get_middle_hip(current_warped_keypoints)
@@ -111,6 +111,11 @@ def convert():
                                 # 角度の書き込み
                                 degree = get_moved_degree(before_middle_hip, before_right_hip, current_middle_hip)
                                 distance_degree_writer.append_degree(person_id, degree)
+
+                                if distance is not None:
+                                    # 以前の向きを考慮した相対座標の書き込み
+                                    relative_position = polar_to_xy(distance, degree)
+                                    relative_position_writer.append(person_id, relative_position)
 
                         # 書き込めたらキャッシュを削除する
                         position_cache.remove(person_id)

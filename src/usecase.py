@@ -52,6 +52,14 @@ def drop_outside(xy: np.ndarray, size: tuple[int, int]) -> np.ndarray | None:
     return xy
 
 
+def polar_to_xy(r: np.float64, deg: np.float64) -> np.ndarray:
+    # 画面上向きを0度とするため、90度を足す
+    rad = np.radians(deg + 90)
+    result = np.array([r * np.cos(rad), r * np.sin(rad)])
+
+    return result
+
+
 def normalize_degree(deg) -> np.float64:
     result = deg
     if np.any(result < 0):
