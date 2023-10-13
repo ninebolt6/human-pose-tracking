@@ -79,6 +79,16 @@ def track():
         for i in range(detected_person_length):
             keypointDict: dict[KeypointEnum, Keypoint] = {}
 
+            if (
+                boxes[i].id is None
+                or boxes[i].xyxy[0] is None
+                or boxes[i].conf[0] is None
+                or keypoints[i].xy[0] is None
+                or keypoints[i].conf[0] is None
+            ):
+                print(f"Frame {frame_num}, detected person {i} is None. Skipping.")
+                continue
+
             for keypointIndex in KeypointEnum:
                 keypointDict[keypointIndex] = Keypoint(
                     xy=keypoints[i].xy[0][keypointIndex.value].cpu().numpy(),
