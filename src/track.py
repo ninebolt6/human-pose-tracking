@@ -135,7 +135,7 @@ def track():
                     "model": config.ModelName,
                     "video_path": config.InputPath,
                     "time_elapsed": ended_at - started_at,
-                    "max_person_count": max(person_id_set),
+                    "max_person_count": max(person_id_set, default=0),
                 },
                 f,
             )
