@@ -20,6 +20,7 @@ dataspace/
 # outputs
 out/
 out_prod/
+*.csv
 
 # ultralytics files
 *.pt
