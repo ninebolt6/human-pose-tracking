@@ -31,7 +31,7 @@ class Midpoint:
         assert p1.xy is not None and p2.xy is not None
 
         self.xy = (p1.xy + p2.xy) / 2.0
-        self.confidence = p1.confidence * p2.confidence
+        self.confidence = np.minimum(p1.confidence, p2.confidence)
 
 
 def warp_keypoints(keypoints: dict[KeypointEnum, Keypoint]) -> dict[KeypointEnum, WarpedKeypoint]:
