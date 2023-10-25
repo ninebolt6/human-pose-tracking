@@ -32,3 +32,9 @@ $ rye run convert
 ```bash
 $ rye run confidence
 ```
+
+### CSV 分割 (split)
+
+```bash
+$ rye run split 分割するファイルのパス 分割数(単位: 人数)
+```
