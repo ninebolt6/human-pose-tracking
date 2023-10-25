@@ -2,6 +2,8 @@ import csv
 from os import path
 import sys
 
+from tqdm import tqdm
+
 
 # CSVを1行ずつ読み込んで、指定した列数で分割する
 def split(input_file_path: str, chunk_size_in_person_id: int):
@@ -10,7 +12,8 @@ def split(input_file_path: str, chunk_size_in_person_id: int):
 
     # ファイルを開く
     with open(input_file_path, "r") as input_file:
-        for row in csv.reader(input_file):
+        reader = csv.reader(input_file)
+        for row in tqdm(reader, unit="row"):
             row_size = len(row)
 
             # 1列目だけ抜き出す
