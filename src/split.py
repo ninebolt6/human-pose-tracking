@@ -9,6 +9,7 @@ from tqdm import tqdm
 def split(input_file_path: str, chunk_size_in_person_id: int):
     chunk_size = chunk_size_in_person_id * 2
     file_basename = path.splitext(path.basename(input_file_path))[0]
+    output_folder = path.dirname(input_file_path)
 
     # ファイルを開く
     with open(input_file_path, "r") as input_file:
@@ -23,7 +24,9 @@ def split(input_file_path: str, chunk_size_in_person_id: int):
             for i in range(0, row_size - 1, chunk_size):
                 # NOTE: x, yの2列で1人分のデータなので、ファイル名としては割る2されたものが正しい
                 file_num = int(i / 2)
-                with open(f"{file_basename}_{file_num}.csv", "a") as output_file:
+                output_path = path.join(output_folder, f"{file_basename}_{file_num}.csv")
+
+                with open(output_path, "a") as output_file:
                     output_row = row[i : i + chunk_size]
                     output_row.insert(0, head_str)
 
